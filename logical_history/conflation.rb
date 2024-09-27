@@ -86,11 +86,11 @@ module LogicalHistory
 
     class Conflation < T::InexactStruct
       prop :before, OSMObject
-      prop :before_at_now, OSMObject
+      prop :before_at_now, T.nilable(OSMObject)
       prop :after, OSMObject
 
       extend T::Sig
-      sig { returns(T::Array[OSMObject]) }
+      sig { returns([OSMObject, T.nilable(OSMObject), OSMObject]) }
       def to_a
         [before, before_at_now, after]
       end
@@ -160,7 +160,7 @@ module LogicalHistory
         before_key = [T.must(befores_refs[ref]).objtype, T.must(befores_refs[ref]).id]
         Conflation.new(
           before: T.must(befores_refs[ref]),
-          before_at_now: T.must(afters_index[before_key]),
+          before_at_now: afters_index[before_key],
           after: T.must(afters_refs[ref]),
         )
       }
@@ -300,7 +300,7 @@ module LogicalHistory
         key_min, dist = T.must(distance_matrix.to_a.min_by{ |_keys, coefs| coefs[0] + coefs[1][0] + coefs[2] })
         match = Conflation.new(
           before: key_min[0],
-          before_at_now: T.must(afters_index[[key_min[0].objtype, key_min[0].id]]),
+          before_at_now: afters_index[[key_min[0].objtype, key_min[0].id]],
           after: key_min[1]
         )
         match.after.geom_distance = match.before.geos&.distance(match.after.geos)
