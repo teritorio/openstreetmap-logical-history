@@ -35,7 +35,7 @@ class TestConflation < Test::Unit::TestCase
         locha_id: 1,
         objtype: 'n',
         id: id,
-        geom: '',
+        geom: geom,
         geos: RGeo::GeoJSON.decode(JSON.parse(geom)),
         geom_distance: 0,
         deleted: false,
