@@ -129,14 +129,14 @@ module OverspassLogicalHistory
     }
   end
 
-  sig { params(object: T.nilable(OSMObject)).returns(T.nilable(String)) }
+  sig { params(object: T.nilable(LogicalHistory::OSMObject)).returns(T.nilable(String)) }
   def self.id(object)
     return nil if object.nil?
 
     "#{object.objtype[0]}#{object.id}_#{object.version}"
   end
 
-  sig { params(object: OSMObject).returns(String) }
+  sig { params(object: LogicalHistory::OSMObject).returns(String) }
   def self.node(object)
     tags = object.tags.to_a.sort.collect{ |k, v| "#{k}=#{v[0..20]}" }.join("\n").gsub('"', '')
     "#{object.objtype[0]}#{object.id}_#{object.version} [label=\"#{object.objtype[0]}#{object.id} v#{object.version}\n\n#{tags}\"];"
@@ -192,8 +192,8 @@ module OverspassLogicalHistory
 
   sig { params(objects: T::Hash[String, OSMObject], links: T::Array[T::Hash[Symbol, T.nilable(String)]], date_start: String, date_end: String).returns(String) }
   def self.graviz(objects, links, date_start, date_end)
-    objects_before = links.collect{ |c| c[:before] }.compact.collect{ |c| objects[c] }
-    objects_after = links.collect{ |c| c[:after] }.compact.collect{ |c| objects[c] }
+    objects_before = links.collect{ |c| c[:before] }.compact.collect{ |c| T.must(objects[c]) }
+    objects_after = links.collect{ |c| c[:after] }.compact.collect{ |c| T.must(objects[c]) }
 
     links = links.select{ |c| !c[:before].nil? && !c[:after].nil? }.collect{ |c|
       "#{c[:before]} -> #{c[:after]};"
