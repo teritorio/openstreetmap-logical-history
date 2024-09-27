@@ -1,0 +1,46 @@
+name: Test Ruby
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libgeos-dev libproj-dev
+
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          cache-version: 1
+
+      - name: Build missing levenshtein
+        run: cd /home/runner/work/openstreetmap-logical-history/openstreetmap-logical-history/vendor/bundle/ruby/3.2.0/gems/levenshtein-ffi-1.1.0/ext/levenshtein && make
+
+      - name: Run rubocop
+        run: bundle exec rubocop --parallel -c .rubocop.yml
+
+      # - name: Run typecheck
+      #   run: |
+      #     bundle exec tapioca init && \
+      #     bundle exec rake rails_rbi:routes && \
+      #     bundle exec srb rbi suggest-typed && \
+      #     bundle exec srb typecheck -q
+      #     # bundle exec tapioca dsl && \
+
+      # - name: Run security checks
+      #   run: |
+      #     bin/bundler-audit --update
+      #     bin/brakeman -q -w2
+
+      - name: Run tests
+        run: bundle exec rake test
