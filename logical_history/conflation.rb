@@ -15,81 +15,31 @@ require './logical_history/geom'
 
 
 module LogicalHistory
-  module OSMObject
-    extend T::Helpers
+  class OSMObject < T::InexactStruct
     extend T::Sig
-    interface!
 
-    sig { abstract.returns(Integer) }
-    def locha_id; end
+    const :locha_id, Integer
+    const :objtype, String
+    const :id, Integer
+    const :geom, String
+    const :geos, T.nilable(RGeo::Feature::Geometry)
+    prop :geom_distance, T.nilable(T.any(Float, Integer))
+    const :deleted, T::Boolean
+    const :members, T.nilable(T::Array[Integer])
+    const :version, Integer
+    const :username, String
+    const :created, String
+    const :tags, T::Hash[String, String]
 
-    sig { abstract.returns(String) }
-    def objtype; end
-
-    sig { abstract.returns(Integer) }
-    def id; end
-
-    sig { abstract.returns(String) }
-    def geom; end
-
-    sig { abstract.returns(T.nilable(RGeo::Feature::Geometry)) }
-    def geos; end
-
-    sig { abstract.returns(T.nilable(T.any(Float, Integer))) }
-    def geom_distance; end
-
-    sig { abstract.params(value: T.nilable(T.any(Float, Integer))).returns(T.any(Float, Integer)) }
-    def geom_distance=(value); end
-
-    sig { abstract.returns(T::Boolean) }
-    def deleted; end
-
-    sig { abstract.returns(T.nilable(T::Array[Integer])) }
-    def members; end
-
-    sig { abstract.returns(Integer) }
-    def version; end
-
-    # sig { abstract.returns(T.nilable(T::Array[Osm::Changeset])) }
-    # def changesets; end
-
-    sig { abstract.returns(String) }
-    def username; end
-
-    sig { abstract.returns(String) }
-    def created; end
-
-    sig { abstract.returns(T::Hash[String, String]) }
-    def tags; end
-
-    # sig { abstract.returns(T::Boolean) }
-    # def is_change; end
-
-    # sig { abstract.returns(T.nilable(T::Array[String])) }
-    # def group_ids; end
-
-    # sig { params(other: OSMObject).returns(T::Boolean) }
-    # def eql?(other)
-    #   objtype == other.objtype && id == other.id && (geos || geom) == (other.geos || other.geom)
-    # end
-
-    # sig { returns(Integer) }
-    # def hash
-    #   [objtype, id, geos&.as_text || geom].hash
-    # end
-
-    # Add struct like methods
-
-    sig { params(hash: T::Hash[String, T.untyped]).returns(OSMObject) }
-    def self.from_hash(hash)
-      raise NotImplementedError
+    sig { overridable.params(other: OSMObject).returns(T::Boolean) }
+    def eql?(other)
+      objtype == other.objtype && id == other.id && (geos || geom) == (other.geos || other.geom)
     end
 
-    sig { abstract.params(params: T.untyped).returns(OSMObject) }
-    def with(**params); end
-
-    sig { abstract.returns(T::Boolean) }
-    def nil?; end
+    sig { overridable.returns(Integer) }
+    def hash
+      [objtype, id, geos&.as_text || geom].hash
+    end
   end
 
   module Conflation

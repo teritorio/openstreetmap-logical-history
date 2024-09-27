@@ -14,37 +14,7 @@ Conflation = LogicalHistory::Conflation
 module OverspassLogicalHistory
   extend T::Sig
 
-  class OSMObject < T::Struct
-    include LogicalHistory::OSMObject
-
-    const :locha_id, Integer
-    const :objtype, String
-    const :id, Integer
-    const :geom, String
-    const :geos, T.nilable(RGeo::Feature::Geometry)
-    prop :geom_distance, T.nilable(T.any(Float, Integer))
-    const :deleted, T::Boolean
-    const :members, T.nilable(T::Array[Integer])
-    const :version, Integer
-    # const :changesets, T.nilable(T::Array[Osm::Changeset])
-    const :username, String
-    const :created, String
-    const :tags, T::Hash[String, String]
-    # const :is_change, T::Boolean
-    # const :group_ids, T.nilable(T::Array[String])
-
-    extend T::Sig
-
-    sig { params(other: OSMObject).returns(T::Boolean) }
-    def eql?(other)
-      objtype == other.objtype && id == other.id && (geos || geom) == (other.geos || other.geom)
-    end
-
-    sig { returns(Integer) }
-    def hash
-      [objtype, id, geos&.as_text || geom].hash
-    end
-
+  class OSMObject < LogicalHistory::OSMObject
     sig { returns(T::Hash[String, T.untyped]) }
     def to_geojson
       {
