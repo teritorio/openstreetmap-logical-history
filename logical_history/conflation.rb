@@ -149,8 +149,7 @@ module LogicalHistory
       b_arr = befores.to_a
       a_arr = afters.to_a
       a_geos_cached = T.let([], T::Array[T::Boolean])
-      0.upto(b_arr.length - 1).each{ |b_i|
-        b = T.must(b_arr[b_i])
+      b_arr.each{ |b|
         next if b.geom.nil?
 
         if T.unsafe(b.geos).nil?
@@ -158,8 +157,7 @@ module LogicalHistory
         end
         next if T.unsafe(b.geos).nil?
 
-        0.upto(a_arr.length - 1).each{ |a_i|
-          a = T.must(a_arr[a_i])
+        a_arr.each_with_index{ |a, a_i|
           next if a.geom.nil?
 
           t_dist = LogicalHistory::Tags.tags_distance(b.tags, a.tags)
@@ -178,21 +176,16 @@ module LogicalHistory
               # Geom distance does not matter on 1x1 matrix, fast return
               [0.0, nil, nil]
             else
-              begin
-                LogicalHistory::Geom.geom_distance(T.must(b.geos), T.must(a.geos), demi_distance)
-              rescue RGeo::Error::InvalidGeometry
-                next
-              end
+              LogicalHistory::Geom.geom_distance(T.must(b.geos), T.must(a.geos), demi_distance)
             end
           )
+          next if g_dist.nil?
 
-          if !g_dist.nil?
-            distance_matrix[[b, a]] = [
-              t_dist,
-              g_dist,
-              (b.objtype == a.objtype && b.id == a.id ? 0.0 : 0.000001),
-            ]
-          end
+          distance_matrix[[b, a]] = [
+            t_dist,
+            g_dist,
+            (b.objtype == a.objtype && b.id == a.id ? 0.0 : 0.000001),
+          ]
         }
       }
 

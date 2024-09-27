@@ -118,6 +118,8 @@ module LogicalHistory
         d = 0.5 + log_distance(r_geom_a, r_geom_b, demi_distance) / 2
         [d, nil, nil]
       end
+    rescue RGeo::Error::InvalidGeometry
+      nil
     end
   end
 end
