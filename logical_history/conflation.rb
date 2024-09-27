@@ -38,6 +38,9 @@ module LogicalHistory
     sig { abstract.returns(T.nilable(T.any(Float, Integer))) }
     def geom_distance; end
 
+    sig { abstract.params(value: T.nilable(T.any(Float, Integer))).returns(T.any(Float, Integer)) }
+    def geom_distance=(value); end
+
     sig { abstract.returns(T::Boolean) }
     def deleted; end
 
@@ -75,10 +78,18 @@ module LogicalHistory
     #   [objtype, id, geos&.as_text || geom].hash
     # end
 
+    # Add struct like methods
+
     sig { params(hash: T::Hash[String, T.untyped]).returns(OSMObject) }
     def self.from_hash(hash)
       raise NotImplementedError
     end
+
+    sig { abstract.params(params: T.untyped).returns(OSMObject) }
+    def with(**params); end
+
+    sig { abstract.returns(T::Boolean) }
+    def nil?; end
   end
 
   module Conflation
