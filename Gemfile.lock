@@ -34,6 +34,13 @@ GEM
     ffi (1.17.0-x86_64-darwin)
     ffi (1.17.0-x86_64-linux-gnu)
     ffi (1.17.0-x86_64-linux-musl)
+    hanami-api (0.3.0)
+      hanami-router (~> 2.0)
+    hanami-router (2.1.0)
+      mustermann (~> 3.0)
+      mustermann-contrib (~> 3.0)
+      rack (~> 2.0)
+    hansi (0.2.1)
     highline (3.0.1)
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
@@ -53,8 +60,14 @@ GEM
     method_source (1.1.0)
     minitest (5.25.1)
     multi_json (1.15.0)
+    mustermann (3.0.3)
+      ruby2_keywords (~> 0.0.1)
+    mustermann-contrib (3.0.3)
+      hansi (~> 0.2.0)
+      mustermann (= 3.0.3)
     mutex_m (0.2.0)
     netrc (0.11.0)
+    nio4r (2.7.3)
     parallel (1.26.3)
     parlour (9.0.0)
       commander (~> 5.0)
@@ -67,7 +80,10 @@ GEM
     polyfill (1.9.0)
     power_assert (2.0.3)
     prism (0.27.0)
+    puma (6.4.3)
+      nio4r (~> 2.0)
     racc (1.8.1)
+    rack (2.2.9)
     rainbow (3.1.1)
     rake (13.2.1)
     rb-fsevent (0.11.2)
@@ -105,6 +121,7 @@ GEM
       prism (>= 0.23.0, < 0.28)
       sorbet-runtime (>= 0.5.10782)
     ruby-progressbar (1.13.0)
+    ruby2_keywords (0.0.5)
     safe_type (1.1.1)
     sorbet (0.5.11582)
       sorbet-static (= 0.5.11582)
@@ -165,8 +182,10 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
+  hanami-api
   json
   levenshtein-ffi
+  puma (~> 6.0)
   rake
   rego
   rexml

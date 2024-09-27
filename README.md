@@ -24,3 +24,18 @@ bundle exec srb typecheck
 bundle exec rubocop --parallel -c .rubocop.yml --autocorrect
 docker compose run --rm script bundle exec rake test
 ```
+
+## Server
+
+Run a small web server to explose the computation algorithm.
+
+Enable server, and install required gems
+```
+bundle config set --local with server
+bundle install
+```
+
+Start the server
+```
+docker compose run --rm -p 9292:9292 script bundle exec rackup --host 0.0.0.0
+```

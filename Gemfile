@@ -13,6 +13,11 @@ gem 'rgeo-geojson'
 gem 'rgeo-proj4'
 gem 'sorbet-runtime'
 
+group :server, optional: true do
+  gem 'hanami-api'
+  gem 'puma', '~> 6.0'
+end
+
 group :development do
   gem 'json'
   gem 'rake'
