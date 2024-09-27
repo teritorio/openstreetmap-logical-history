@@ -1,3 +1,5 @@
 services:
   script:
     build: .
+    volumes:
+      - .:/srv/app

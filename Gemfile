@@ -16,9 +16,11 @@ gem 'sorbet-runtime'
 group :development do
   gem 'json'
   gem 'rake'
+  gem 'rexml'
   gem 'rubocop', require: false
   gem 'ruby-lsp', require: false
   gem 'sorbet'
+  gem 'sorbet-rails'
   gem 'tapioca', require: false
   gem 'test-unit'
 
