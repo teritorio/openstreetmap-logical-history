@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: strict
 
 require 'sorbet-runtime'
 require 'test/unit'
