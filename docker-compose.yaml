@@ -3,3 +3,6 @@ services:
     build: .
     volumes:
       - .:/srv/app
+    ports:
+      - 9292:9292
+    command: bundle exec rackup --host 0.0.0.0

@@ -37,5 +37,10 @@ bundle install
 
 Start the server
 ```
-docker compose run --rm -p 9292:9292 script bundle exec rackup --host 0.0.0.0
+docker compose up script
+```
+
+Query with
+```
+http://127.0.0.1:9292/api/0.1/overpass_logical_history
 ```
