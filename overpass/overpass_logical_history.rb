@@ -20,7 +20,6 @@ module OverspassLogicalHistory
       {
         type: 'Feature',
         properties: {
-          locha_id: locha_id,
           objtype: objtype,
           id: id,
           geom_distance: geom_distance,
@@ -102,7 +101,6 @@ module OverspassLogicalHistory
     geos_factory = OSMObject.build_geos_factory(local_srid)
     osm_data.select{ |element| !element['tag'].nil? && %w[node way].include?(element['type']) }.collect{ |element|
       OSMObject.new(
-        locha_id: 0,
         objtype: 'node',
         id: element['id'].to_i,
         geom: (

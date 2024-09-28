@@ -34,7 +34,6 @@ class TestConflation < Test::Unit::TestCase
   )
     geos_factory = OSMObject.build_geos_factory(srid)
     OSMObject.new(
-        locha_id: 1,
         objtype: 'n',
         id: id,
         geom: geom,

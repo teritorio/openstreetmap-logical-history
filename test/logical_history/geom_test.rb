@@ -7,7 +7,7 @@ require './logical_history/geom'
 
 Geom = LogicalHistory::Geom
 
-class TestLoCha < Test::Unit::TestCase
+class TestGeom < Test::Unit::TestCase
   extend T::Sig
 
   sig { void }

@@ -18,7 +18,6 @@ module LogicalHistory
   class OSMObject < T::InexactStruct
     extend T::Sig
 
-    const :locha_id, Integer
     const :objtype, String
     const :id, Integer
     const :geom, String
