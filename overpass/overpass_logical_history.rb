@@ -85,12 +85,13 @@ module OverspassLogicalHistory
 
   sig {
     params(
-      osm_data: T::Array[T::Hash[String, T.untyped]]
+      osm_data: T::Array[T::Hash[String, T.untyped]],
+      local_srid: Integer,
     ).returns(
       T::Array[OSMObject]
     )
   }
-  def self.overpass_to_geojson(osm_data)
+  def self.overpass_to_geojson(osm_data, local_srid)
     osm_data = osm_data.collect{ |g|
       g.collect{ |type, element|
         element['type'] = type
@@ -98,6 +99,7 @@ module OverspassLogicalHistory
       }
     }.flatten(2)
 
+    geos_factory = OSMObject.build_geos_factory(local_srid)
     osm_data.select{ |element| !element['tag'].nil? && %w[node way].include?(element['type']) }.collect{ |element|
       OSMObject.new(
         locha_id: 0,
@@ -119,6 +121,7 @@ module OverspassLogicalHistory
             }
           end
         ).to_json,
+        geos_factory: geos_factory,
         deleted: false,
         members: nil, ##################### TODO
         version: element['version'].to_i,
@@ -156,10 +159,10 @@ module OverspassLogicalHistory
   }
   def self.struct(bbox, date_start, date_end, srid, demi_distance)
     data_start, data_end = OverspassLogicalHistory.fetch_osm_at_data(bbox, date_start, date_end)
-    data_start = OverspassLogicalHistory.overpass_to_geojson(data_start)
-    data_end = OverspassLogicalHistory.overpass_to_geojson(data_end)
+    data_start = OverspassLogicalHistory.overpass_to_geojson(data_start, srid)
+    data_end = OverspassLogicalHistory.overpass_to_geojson(data_end, srid)
 
-    conf = Conflation.conflate(data_start, data_end, srid, demi_distance)
+    conf = Conflation.conflate(data_start, data_end, demi_distance)
 
     objects = (data_start + data_end).index_by{ |e| id(e) }
     links = conf.collect{ |c|

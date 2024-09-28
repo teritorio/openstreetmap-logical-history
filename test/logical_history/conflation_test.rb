@@ -14,7 +14,6 @@ OSMObject = LogicalHistory::OSMObject
 class TestConflation < Test::Unit::TestCase
   extend T::Sig
 
-  @@srid = T.let(4326, Integer) # No projection
   @@demi_distance = T.let(1.0, Float) # m
 
   sig {
@@ -23,20 +22,23 @@ class TestConflation < Test::Unit::TestCase
       version: Integer,
       tags: T::Hash[String, String],
       geom: String,
+      srid: Integer,
     ).returns(OSMObject)
   }
   def build_object(
     id: 1,
     version: 1,
     tags: { 'highway' => 'a' },
-    geom: '{"type":"Point","coordinates":[0,0]}'
+    geom: '{"type":"Point","coordinates":[0,0]}',
+    srid: 4326
   )
+    geos_factory = OSMObject.build_geos_factory(srid)
     OSMObject.new(
         locha_id: 1,
         objtype: 'n',
         id: id,
         geom: geom,
-        geos: RGeo::GeoJSON.decode(JSON.parse(geom)),
+        geos_factory: geos_factory,
         geom_distance: 0,
         deleted: false,
         members: nil,
@@ -56,16 +58,18 @@ class TestConflation < Test::Unit::TestCase
       after_tags: T::Hash[String, String],
       before_geom: String,
       after_geom: String,
+      srid: Integer,
     ).returns([T::Array[OSMObject], T::Array[OSMObject]])
   }
   def build_objects(
     before_tags: { 'highway' => 'a' },
     after_tags: { 'highway' => 'a' },
     before_geom: '{"type":"Point","coordinates":[0,0]}',
-    after_geom: '{"type":"Point","coordinates":[0,0]}'
+    after_geom: '{"type":"Point","coordinates":[0,0]}',
+    srid: 4326
   )
-    before = [build_object(id: 1, tags: before_tags, geom: before_geom)]
-    after = [build_object(id: 1, tags: after_tags, geom: after_geom)]
+    before = [build_object(id: 1, tags: before_tags, geom: before_geom, srid: srid)]
+    after = [build_object(id: 1, tags: after_tags, geom: after_geom, srid: srid)]
     [before, after]
   end
 
@@ -74,19 +78,19 @@ class TestConflation < Test::Unit::TestCase
     before, after = build_objects(before_tags: { 'ref' => 'a' }, after_tags: { 'ref' => 'a' })
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     before, after = build_objects(before_tags: { 'ref' => 'a', 'foo' => 'a' }, after_tags: { 'ref' => 'a', 'foo' => 'b' })
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     before, after = build_objects(before_tags: { 'ref' => 'a' }, after_tags: { 'ref' => 'b' })
     assert_equal(
       [[before[0], after[0], nil], [nil, nil, after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
   end
 
@@ -95,19 +99,19 @@ class TestConflation < Test::Unit::TestCase
     before, after = build_objects(before_tags: { 'highway' => 'a' }, after_tags: { 'highway' => 'a' })
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     before, after = build_objects(before_tags: { 'highway' => 'a', 'foo' => 'a' }, after_tags: { 'highway' => 'a', 'foo' => 'b' })
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     before, after = build_objects(before_tags: { 'highway' => 'a' }, after_tags: { 'building' => 'b' })
     assert_equal(
       [[before[0], after[0], nil], [nil, nil, after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     bt = {
@@ -131,7 +135,7 @@ class TestConflation < Test::Unit::TestCase
     assert(T.must(Tags.tags_distance(bt, at)) < 0.5)
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
   end
 
@@ -145,7 +149,7 @@ class TestConflation < Test::Unit::TestCase
     )&.first)
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[1,0]]}', after_geom: '{"type":"LineString","coordinates":[[0,0],[0,1]]}')
@@ -156,7 +160,7 @@ class TestConflation < Test::Unit::TestCase
     )&.first)
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
     before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[0,1]]}', after_geom: '{"type":"LineString","coordinates":[[0,2],[0,3]]}')
@@ -167,7 +171,7 @@ class TestConflation < Test::Unit::TestCase
     )&.first)
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
   end
 
@@ -183,7 +187,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 2, geom: geom, tags: tags),
     ]
 
-    conflations = Conflation.conflate(before, after, @@srid, @@demi_distance)
+    conflations = Conflation.conflate(before, after, @@demi_distance)
     assert_equal(1, conflations.size, conflations)
     assert_equal([[before[0], after[0], after[1]]], conflations.collect(&:to_a))
   end
@@ -199,7 +203,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 2, geom: geom, tags: { 'highway' => 'residential' }),
     ]
 
-    conflations = Conflation.conflate(before, after, @@srid, @@demi_distance)
+    conflations = Conflation.conflate(before, after, @@demi_distance)
     assert_equal(2, conflations.size, conflations)
     assert_equal([[before[0], after[0], after[1]], [nil, nil, after[0]]], conflations.collect(&:to_a))
   end
@@ -213,11 +217,11 @@ class TestConflation < Test::Unit::TestCase
       after_geom: '{"type":"Point","coordinates":[0, 0]}'
     )
     assert_equal(nil, Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
-    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@srid, @@demi_distance).first
+    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal({}, conflate_distances)
     assert_equal(
       [[before[0], after[0], nil], [nil, nil, after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
   end
 
@@ -230,11 +234,11 @@ class TestConflation < Test::Unit::TestCase
       after_geom: '{"type":"Point","coordinates":[0, 2]}'
     )
     assert_equal(0.0, Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
-    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@srid, @@demi_distance).first
+    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal({}, conflate_distances)
     assert_equal(
       [[before[0], after[0], nil], [nil, nil, after[0]]],
-      Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
   end
 
@@ -247,11 +251,11 @@ class TestConflation < Test::Unit::TestCase
       after_geom: '{"type":"Point","coordinates":[0, 0.5]}'
     )
     assert_equal(0.0, Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
-    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@srid, @@demi_distance).first
+    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal([[before[0], after[0]]], conflate_distances.keys)
     assert_equal(0.0, T.must(conflate_distances.values[0])[0])
     assert_equal(0.0, T.must(conflate_distances.values[0])[2])
-    assert_equal([[before[0], after[0], after[0]]], Conflation.conflate(before, after, @@srid, @@demi_distance).collect(&:to_a))
+    assert_equal([[before[0], after[0], after[0]]], Conflation.conflate(before, after, @@demi_distance).collect(&:to_a))
   end
 
   sig { void }
@@ -263,11 +267,12 @@ class TestConflation < Test::Unit::TestCase
       before_tags: { 'building' => 'retail' },
       before_geom: '{"type":"Point","coordinates":[28.10176, -15.44687]}',
       after_tags: { 'building' => 'yes', 'building:levels' => '13' },
-      after_geom: '{"type":"Point","coordinates":[28.10128, -15.44647]}'
+      after_geom: '{"type":"Point","coordinates":[28.10128, -15.44647]}',
+      srid: srid,
     )
-    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, srid, demi_distance).first
+    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, demi_distance)
     assert_equal([], conflate_distances.keys)
-    assert_equal([[before[0], after[0], nil], [nil, nil, after[0]]], Conflation.conflate(before, after, srid, demi_distance).collect(&:to_a))
+    assert_equal([[before[0], after[0], nil], [nil, nil, after[0]]], Conflation.conflate(before, after, demi_distance).collect(&:to_a))
   end
 
   sig { void }
@@ -283,8 +288,8 @@ class TestConflation < Test::Unit::TestCase
       'public_transport' => 'platform',
     }
     before = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: before_tags),
-      build_object(id: 2, geom: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: before_tags),
+      build_object(id: 1, geom: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: before_tags, srid: srid),
+      build_object(id: 2, geom: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: before_tags, srid: srid),
     ]
 
     after_tags = {
@@ -298,15 +303,15 @@ class TestConflation < Test::Unit::TestCase
       'shelter' => 'no',
     }
     after = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: after_tags),
-      build_object(id: 2, geom: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: after_tags),
+      build_object(id: 1, geom: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: after_tags, srid: srid),
+      build_object(id: 2, geom: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: after_tags, srid: srid),
     ]
 
-    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, srid, demi_distance).first
+    conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, demi_distance)
     assert_equal(4, conflate_distances.keys.size)
     assert_equal(
       [[before[0], after[0], after[0]], [before[1], after[1], after[1]]],
-      Conflation.conflate(before, after, srid, demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, demi_distance).collect(&:to_a)
     )
   end
 
@@ -322,7 +327,7 @@ class TestConflation < Test::Unit::TestCase
       'opening_hours' => 'Mo-Sa 09:30-13:00,14:30-18:00',
     }
     before = [
-      build_object(id: 1, geom: geojson, tags: before_tags),
+      build_object(id: 1, geom: geojson, tags: before_tags, srid: srid),
     ]
 
     after_tags = {
@@ -330,12 +335,12 @@ class TestConflation < Test::Unit::TestCase
       'opening_hours' => 'Mo-Sa 09:30-13:00,14:30-18:00; PH 10:00-13:00',
     }
     after = [
-      build_object(id: 1, geom: geojson, tags: after_tags),
+      build_object(id: 1, geom: geojson, tags: after_tags, srid: srid),
     ]
 
     assert_equal(
       [[before[0], after[0], after[0]]],
-      Conflation.conflate(before, after, srid, demi_distance).collect(&:to_a)
+      Conflation.conflate(before, after, demi_distance).collect(&:to_a)
     )
   end
 
@@ -353,7 +358,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,1],[0,2]]}', tags: tags),
     ]
 
-    conflations = Conflation.conflate(before, after, @@srid, @@demi_distance)
+    conflations = Conflation.conflate(before, after, @@demi_distance)
     assert_equal(2, conflations.size, conflations)
     assert_equal(
       [[before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) },
@@ -378,7 +383,7 @@ class TestConflation < Test::Unit::TestCase
       )
     ]
 
-    conflation = Conflation.conflate(before, after, @@srid, @@demi_distance)
+    conflation = Conflation.conflate(before, after, @@demi_distance)
     assert_equal(1, conflation.size, conflation)
     assert_equal(
       [[before[0], after[0], after[0]]].collect{ |t| t.collect(&:id) },
@@ -398,7 +403,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,1]]}', tags: tags),
     ]
 
-    conflations = Conflation.conflate(before, after, @@srid, @@demi_distance)
+    conflations = Conflation.conflate(before, after, @@demi_distance)
     assert_equal(1, conflations.size, conflations)
     assert_equal(
       [[before[0], after[0], after[0]]].collect{ |t| t.collect(&:id) },
@@ -415,8 +420,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 1, geom: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'b' }),
     ]
 
-    conflations = Conflation.conflate_with_simplification(before, after, @@srid, @@demi_distance)
-    puts conflations.inspect
+    conflations = Conflation.conflate_with_simplification(before, after, @@demi_distance)
     assert_equal(1, conflations.size, conflations)
     assert_equal(
       [[before[0], after[0], after[0]]].collect{ |t| t.collect(&:id) },
