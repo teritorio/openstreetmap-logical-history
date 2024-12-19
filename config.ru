@@ -20,7 +20,10 @@ class App < Hanami::API
 
     [
       200,
-      { 'Content-Type' => 'application/geo+json' },
+      {
+        'Content-Type' => 'application/geo+json',
+        'Access-Control-Allow-Origin' => '*',
+      },
       body
     ]
   end

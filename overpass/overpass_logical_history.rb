@@ -68,7 +68,7 @@ module OverspassLogicalHistory
     h = Hash.from_xml(response.body)
     old = []
     new = []
-    h['osm']['action'].collect{ |action|
+    h.dig('osm', 'action')&.collect{ |action|
       case action['type']
       when 'delete'
         old << action['old']
