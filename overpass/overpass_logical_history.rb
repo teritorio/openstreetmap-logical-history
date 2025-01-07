@@ -101,7 +101,7 @@ module OverspassLogicalHistory
     geos_factory = OSMObject.build_geos_factory(local_srid)
     osm_data.select{ |element| !element['tag'].nil? && %w[node way].include?(element['type']) }.collect{ |element|
       OSMObject.new(
-        objtype: 'node',
+        objtype: element['type'],
         id: element['id'].to_i,
         geom: (
           case element['type']
@@ -176,12 +176,14 @@ module OverspassLogicalHistory
   sig {
     params(
       objects: T::Hash[String, OSMObject],
+      bbox: [Float, Float, Float, Float],
       links: T::Array[T::Hash[Symbol, T.nilable(String)]],
     ).returns(T::Hash[String, T.untyped])
   }
-  def self.to_geojson(objects, links)
+  def self.to_geojson(objects, bbox, links)
     {
       type: 'FeatureCollection',
+      bbox: bbox,
       features: objects.collect{ |id, feature|
         geojson = feature.to_geojson
         geojson['id'] = id

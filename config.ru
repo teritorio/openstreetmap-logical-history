@@ -16,7 +16,9 @@ class App < Hanami::API
 
     objects, links = OverspassLogicalHistory.struct(bbox, date_start, date_end, srid, demi_distance)
 
-    body = OverspassLogicalHistory.to_geojson(objects, links).to_json
+    bbox = bbox.split(',').map(&:to_f)
+    bbox = [bbox[1], bbox[0], bbox[3], bbox[2]]
+    body = OverspassLogicalHistory.to_geojson(objects, bbox, links).to_json
 
     [
       200,
