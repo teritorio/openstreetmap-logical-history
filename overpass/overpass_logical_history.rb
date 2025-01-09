@@ -104,13 +104,19 @@ module OverspassLogicalHistory
         objtype: element['type'],
         id: element['id'].to_i,
         geom: (
-          case element['type']
-          when 'node'
+          if element['type'] == 'node'
             {
               'type' => 'Point',
               'coordinates' => [element['lon'].to_f, element['lat'].to_f]
             }
-          when 'way'
+          elsif element['type'] == 'way' && element['nd'][0] == element['nd'][-1]
+            {
+              'type' => 'Polygon',
+              'coordinates' => [element['nd'].map{ |node|
+                [node['lon'].to_f, node['lat'].to_f]
+              }]
+            }
+          elsif element['type'] == 'way'
             {
               'type' => 'LineString',
               'coordinates' => element['nd'].map{ |node|
