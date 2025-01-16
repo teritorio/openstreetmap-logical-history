@@ -136,11 +136,13 @@ module OverspassLogicalHistory
     }
   end
 
-  sig { params(object: T.nilable(LogicalHistory::OSMObject)).returns(T.nilable(String)) }
+  ID_CACHE = T.let(Hash.new { |h, k| h[k] = h.size }, T::Hash[String, Integer])
+
+  sig { params(object: T.nilable(LogicalHistory::OSMObject)).returns(T.nilable(Integer)) }
   def self.id(object)
     return nil if object.nil?
 
-    "#{object.objtype[0]}#{object.id}_#{object.version}"
+    ID_CACHE["#{object.objtype[0]}#{object.id}_#{object.version}"]
   end
 
   sig { params(object: LogicalHistory::OSMObject).returns(String) }
