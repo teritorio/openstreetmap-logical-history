@@ -86,6 +86,36 @@ module LogicalHistory
       def to_a
         [before, before_at_now, after]
       end
+
+      sig { returns(T::Hash[String, T::Array[[String, String, NilClass]]]) }
+      def diff_attribs
+        # Unchecked attribs
+        # - version
+        # - changeset
+        # - uid
+        # - username
+        # - nodes
+        # - lat
+        # - lon
+        # - members
+        %i[deleted geom_distance].collect { |attrib|
+          next if before.send(attrib) != after.send(attrib)
+
+          [attrib.to_s, [['diff', 'reject', nil]]]
+        }.compact.to_h
+      end
+
+      sig { returns(T::Hash[String, T::Array[[String, String, NilClass]]]) }
+      def diff_tags
+        (before.tags.keys + after.tags.keys).uniq.collect{ |tag|
+          next if (before.tags[tag] || tag) != (after.tags[tag] || tag)
+
+          [
+            tag,
+            [['diff', 'reject', nil]]
+          ]
+        }.compact.to_h
+      end
     end
 
     Conflations = T.type_alias { T::Array[Conflation] }
@@ -99,6 +129,40 @@ module LogicalHistory
       sig { returns(T::Array[T.nilable(OSMObject)]) }
       def to_a
         [before, before_at_now, after]
+      end
+
+      sig { returns(T::Hash[String, T::Array[[String, String, T.untyped]]]) }
+      def diff_attribs
+        # Unchecked attribs
+        # - version
+        # - changeset
+        # - uid
+        # - username
+        # - nodes
+        # - lat
+        # - lon
+        # - members
+        %i[deleted geom_distance].collect { |attrib|
+          next if before&.send(attrib) == after&.send(attrib)
+
+          if after&.geom_distance.nil?
+            [attrib.to_s, [['diff', 'reject', nil]]]
+          else
+            [attrib.to_s, [['diff', 'reject', { dist: after&.geom_distance }]]]
+          end
+        }.compact.to_h
+      end
+
+      sig { returns(T::Hash[String, T::Array[[String, String, NilClass]]]) }
+      def diff_tags
+        ((before&.tags&.keys || []) + (after&.tags&.keys || [])).uniq.collect{ |tag|
+          next if (before&.tags&.[](tag) || tag) == (after&.tags&.[](tag) || tag)
+
+          [
+            tag,
+            [['diff', 'reject', nil]]
+          ]
+        }.compact.to_h
       end
     end
 

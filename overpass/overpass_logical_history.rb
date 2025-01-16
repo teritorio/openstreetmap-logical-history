@@ -160,7 +160,7 @@ module OverspassLogicalHistory
       demi_distance: Float
     ).returns([
       T::Hash[String, OSMObject],
-      T::Array[T::Hash[Symbol, T.nilable(String)]]
+      T::Array[T::Hash[Symbol, T.untyped]]
     ])
   }
   def self.struct(bbox, date_start, date_end, srid, demi_distance)
@@ -173,8 +173,12 @@ module OverspassLogicalHistory
     objects = (data_start + data_end).index_by{ |e| id(e) }
     links = conf.collect{ |c|
       {
+        action: 'reject',
+        # matches: [],
         before: id(c.before),
         after: id(c.after),
+        diff_attribs: c.diff_attribs.presence,
+        diff_tags: c.diff_tags.presence,
       }.compact
     }
 
@@ -197,7 +201,10 @@ module OverspassLogicalHistory
         geojson['id'] = id
         geojson
       },
-      metadata: { links: links },
+      metadata: {
+        links: links,
+        changesets: [],
+      },
     }
   end
 
