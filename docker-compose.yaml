@@ -1,6 +1,7 @@
 services:
   script:
     build: .
+    image: ghcr.io/teritorio/openstreetmap-logical-history:master
     volumes:
       - .:/srv/app
     ports:
