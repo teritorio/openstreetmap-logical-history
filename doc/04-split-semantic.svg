@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="211.47577mm"
+   height="44.493565mm"
+   viewBox="0 0 211.47577 44.493565"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.1 (93de688d07, 2025-03-30)"
+   sodipodi:docname="04-split-semantic.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#cccccc"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="1"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.9743374"
+     inkscape:cx="464.41818"
+     inkscape:cy="36.435017"
+     inkscape:window-width="1882"
+     inkscape:window-height="1061"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="ArrowWide"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path39" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWide-4"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path39-4" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWide-4-6"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path39-4-0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWide-4-7"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path39-4-7" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(15.838614,-124.69156)">
+    <rect
+       style="fill:#f5d4a1;fill-opacity:1;stroke:#fa9700;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1"
+       width="25.436323"
+       height="26.013485"
+       x="52.407993"
+       y="135.49326" />
+    <rect
+       style="fill:#f5d4a1;fill-opacity:1;stroke:#fa9700;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1-5"
+       width="25.436323"
+       height="26.013485"
+       x="104.71474"
+       y="135.49326" />
+    <ellipse
+       style="fill:#f5d4a1;fill-opacity:1;stroke:#fa9700;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+       id="path1"
+       cx="117.62397"
+       cy="155.02742"
+       rx="2.4607527"
+       ry="2.601367" />
+    <ellipse
+       style="fill:#f5d4a1;fill-opacity:1;stroke:#fa9700;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+       id="path1-9"
+       cx="122.67306"
+       cy="144.65234"
+       rx="2.4607527"
+       ry="2.601367" />
+    <g
+       id="g47"
+       transform="translate(0,1.2754585)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777px;line-height:normal;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-decoration-color:#000000;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+         x="-15.979728"
+         y="133.01344"
+         id="text1"><tspan
+           sodipodi:role="line"
+           id="tspan30"
+           x="-15.979728"
+           y="133.01344">addr:city=Bordeaux Caudéran</tspan><tspan
+           sodipodi:role="line"
+           id="tspan31"
+           x="-15.979728"
+           y="137.42316">addr:housenumber=365</tspan><tspan
+           sodipodi:role="line"
+           id="tspan32"
+           x="-15.979728"
+           y="141.83287">addr:postcode=33200</tspan><tspan
+           sodipodi:role="line"
+           id="tspan33"
+           x="-15.979728"
+           y="146.24258">addr:street=Avenue Tassigny</tspan><tspan
+           sodipodi:role="line"
+           id="tspan34"
+           x="-15.979728"
+           y="150.6523">building=yes</tspan><tspan
+           sodipodi:role="line"
+           id="tspan35"
+           x="-15.979728"
+           y="155.06201">name=Amandine 1900</tspan><tspan
+           sodipodi:role="line"
+           id="tspan36"
+           x="-15.979728"
+           y="159.47173">organic=only</tspan><tspan
+           sodipodi:role="line"
+           id="tspan37"
+           x="-15.979728"
+           y="163.88142">shop=bakery</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:25.0008px;line-height:normal;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-decoration-color:#000000;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001;stroke-dasharray:none;stroke-opacity:1"
+         x="63.221519"
+         y="93.949524"
+         id="text38"
+         transform="scale(0.57628156,1.7352629)"><tspan
+           sodipodi:role="line"
+           id="tspan38"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:25.0008px;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001"
+           x="63.221519"
+           y="93.949524">}</tspan></text>
+      <path
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
+         d="M 43.611373,146.89187 52.407994,148.5 v 0 0"
+         id="path38" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777px;line-height:normal;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-decoration-color:#000000;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+       x="143.63428"
+       y="128.13304"
+       id="text1-6"><tspan
+         sodipodi:role="line"
+         id="tspan30-3"
+         x="143.63428"
+         y="128.13304">addr:city=Bordeaux Caudéran</tspan><tspan
+         sodipodi:role="line"
+         id="tspan31-1"
+         x="143.63428"
+         y="132.54276">addr:housenumber=365</tspan><tspan
+         sodipodi:role="line"
+         id="tspan32-7"
+         x="143.63428"
+         y="136.95247">addr:postcode=33200</tspan><tspan
+         sodipodi:role="line"
+         id="tspan33-5"
+         x="143.63428"
+         y="141.36218">addr:street=Avenue Tassigny</tspan><tspan
+         sodipodi:role="line"
+         id="tspan34-9"
+         x="143.63428"
+         y="145.7719" /><tspan
+         sodipodi:role="line"
+         x="143.63428"
+         y="150.18161"
+         id="tspan50">building=yes</tspan><tspan
+         sodipodi:role="line"
+         x="143.63428"
+         y="154.59132"
+         id="tspan49" /><tspan
+         sodipodi:role="line"
+         id="tspan35-6"
+         x="143.63428"
+         y="159.00102">name=Amandine 1900</tspan><tspan
+         sodipodi:role="line"
+         id="tspan36-2"
+         x="143.63428"
+         y="163.41074">organic=only</tspan><tspan
+         sodipodi:role="line"
+         id="tspan37-1"
+         x="143.63428"
+         y="167.82045">shop=bakery</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide-4)"
+       d="m 137.36811,134.3477 v 0 l -11.11196,6.75881"
+       id="path38-5"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide-4-6)"
+       d="m 137.36811,149.16438 v 0 L 130.15106,148.5"
+       id="path38-5-8"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide-4-7)"
+       d="m 137.62603,162.22414 v 0 l -15.48615,-5.79673"
+       id="path38-5-3"
+       sodipodi:nodetypes="ccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:17.6291px;line-height:normal;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-decoration-color:#000000;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001;stroke-dasharray:none;stroke-opacity:1"
+       x="-175.92435"
+       y="115.91885"
+       id="text47"
+       transform="scale(-0.81725734,1.2236048)"><tspan
+         sodipodi:role="line"
+         id="tspan47"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:17.6291px;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001"
+         x="-175.92435"
+         y="115.91885">}</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:14.7922px;line-height:normal;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-decoration-color:#000000;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001;stroke-dasharray:none;stroke-opacity:1"
+       x="-147.68503"
+       y="163.80345"
+       id="text47-4"
+       transform="scale(-0.97399662,1.0266976)"><tspan
+         sodipodi:role="line"
+         id="tspan47-33"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:14.7922px;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001"
+         x="-147.68503"
+         y="163.80345">}</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:10.2836px;line-height:normal;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-decoration-color:#000000;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001;stroke-dasharray:none;stroke-opacity:1"
+       x="-102.48281"
+       y="212.67827"
+       id="text47-8"
+       transform="scale(-1.401017,0.71376721)"><tspan
+         sodipodi:role="line"
+         id="tspan47-3"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:10.2836px;font-family:'AR PL UMing CN';-inkscape-font-specification:'AR PL UMing CN, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.700001"
+         x="-102.48281"
+         y="212.67827">}</tspan></text>
+    <path
+       style="fill:#73d216;stroke:#000000;stroke-width:1;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Triangle)"
+       d="M 82.691557,147.99668 H 98.165319"
+       id="path4"
+       sodipodi:nodetypes="cc" />
+  </g>
+</svg>
