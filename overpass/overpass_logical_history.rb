@@ -48,7 +48,7 @@ module OverspassLogicalHistory
       T::Array[T::Hash[String, T.untyped]]
     ])
   }
-  def self.fetch_osm_at_data(bbox, date_start, date_end)
+  def self.fetch_osm_at_date(bbox, date_start, date_end)
     overpass_url = 'https://overpass-api.de/api/interpreter'
 
     overpass_query = <<-QUERY
@@ -164,7 +164,7 @@ module OverspassLogicalHistory
     ])
   }
   def self.struct(bbox, date_start, date_end, srid, demi_distance)
-    data_start, data_end = OverspassLogicalHistory.fetch_osm_at_data(bbox, date_start, date_end)
+    data_start, data_end = OverspassLogicalHistory.fetch_osm_at_date(bbox, date_start, date_end)
     data_start = OverspassLogicalHistory.overpass_to_geojson(data_start, srid)
     data_end = OverspassLogicalHistory.overpass_to_geojson(data_end, srid)
 
