@@ -82,6 +82,7 @@ module LogicalHistory
       prop :after, OSMObject
 
       extend T::Sig
+
       sig { returns([OSMObject, T.nilable(OSMObject), OSMObject]) }
       def to_a
         [before, before_at_now, after]
@@ -126,6 +127,7 @@ module LogicalHistory
       prop :after, T.nilable(OSMObject)
 
       extend T::Sig
+
       sig { returns(T::Array[T.nilable(OSMObject)]) }
       def to_a
         [before, before_at_now, after]
