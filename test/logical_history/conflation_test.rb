@@ -263,7 +263,7 @@ class TestConflation < Test::Unit::TestCase
     demi_distance = 200.0 # m
 
     before, after = build_objects(
-      before_tags: { 'building' => 'retail' },
+      before_tags: { 'landuse' => 'retail' },
       before_geom: '{"type":"Point","coordinates":[28.10176, -15.44687]}',
       after_tags: { 'building' => 'yes', 'building:levels' => '13' },
       after_geom: '{"type":"Point","coordinates":[28.10128, -15.44647]}',

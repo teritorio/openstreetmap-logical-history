@@ -26,6 +26,9 @@ module LogicalHistory
       'railway' => %w[abandoned construction disused funicular light_rail miniature monorail narrow_gauge preserved rail subway tram],
       'waterway' => %w[river riverbank stream tidal_channel flowline canal pressurised drain ditch],
       'landuse' => nil,
+      'natural' => nil,
+      'building' => nil,
+      'leisure' => nil,
 
       'entrance' => nil,
       'place' => nil,
@@ -91,7 +94,7 @@ module LogicalHistory
     }
     def self.tags_distance(tags_a, tags_b)
       a, b = [tags_a, tags_b].collect{ |tags|
-        tags.partition{ |k, _v| MAIN_TAGS.include?(k) }.collect(&:to_h)
+        tags.partition{ |k, _v| MAIN_TAGS.include?(k) }.select(&:any?).collect(&:to_h)
       }
 
       # Main tags
