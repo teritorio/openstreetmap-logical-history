@@ -1,12 +1,11 @@
-FROM ruby:3.2-alpine
+FROM ruby:3.4-alpine
 
 RUN apk add --no-cache --virtual \
         build-dependencies \
         build-base \
         geos-dev \
         proj-dev \
-        ruby-dev \
-        ruby-json
+        ruby-dev
 
 WORKDIR /srv/app
 
