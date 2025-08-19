@@ -68,6 +68,7 @@ GEM
       mustermann (= 3.0.4)
     netrc (0.11.0)
     nio4r (2.7.4)
+    pairing_heap (3.1.0)
     parallel (1.27.0)
     parlour (9.1.2)
       commander (~> 5.0)
@@ -106,6 +107,10 @@ GEM
       rgeo (>= 1.0.0)
     rgeo-proj4 (4.0.0)
       rgeo (~> 3.0.0)
+    rgl (0.6.6)
+      pairing_heap (>= 0.3, < 4.0)
+      rexml (~> 3.2, >= 3.2.4)
+      stream (~> 0.5.3)
     rubocop (1.79.2)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -154,6 +159,7 @@ GEM
       rexml (>= 3.2.6)
       sorbet-static-and-runtime (>= 0.5.10187)
       thor (>= 0.19.2)
+    stream (0.5.5)
     tapioca (0.16.11)
       benchmark
       bundler (>= 2.2.25)
@@ -197,6 +203,7 @@ DEPENDENCIES
   rexml
   rgeo-geojson
   rgeo-proj4
+  rgl
   rubocop
   ruby-lsp
   sorbet

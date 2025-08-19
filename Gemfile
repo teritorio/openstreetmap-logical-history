@@ -11,6 +11,7 @@ gem 'levenshtein-ffi'
 gem 'rego'
 gem 'rgeo-geojson'
 gem 'rgeo-proj4'
+gem 'rgl'
 gem 'sorbet-runtime'
 
 group :server, optional: true do

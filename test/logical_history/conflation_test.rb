@@ -426,4 +426,19 @@ class TestConflation < Test::Unit::TestCase
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }
     )
   end
+
+  sig { void }
+  def test_conflate_cluster
+    before, after = build_objects(before_tags: { 'ref' => 'a' }, after_tags: { 'ref' => 'a' })
+    assert_equal(
+      [[[before[0], after[0], after[0]]]],
+      Conflation.conflate_cluster(before, after, @@demi_distance).collect{ |t| t.collect(&:to_a) }
+    )
+
+    before, after = build_objects(before_tags: { 'ref' => 'a', 'foo' => 'a' }, after_tags: { 'ref' => 'a', 'foo' => 'b' })
+    assert_equal(
+      [[[before[0], after[0], after[0]]]],
+      Conflation.conflate_cluster(before, after, @@demi_distance).collect{ |t| t.collect(&:to_a) }
+    )
+  end
 end

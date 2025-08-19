@@ -158,51 +158,60 @@ module OverspassLogicalHistory
       date_end: String,
       srid: Integer,
       demi_distance: Float
-    ).returns([
-      T::Hash[String, OSMObject],
+    ).returns(T::Array[[
+      T::Hash[Integer, OSMObject],
       T::Array[T::Hash[Symbol, T.untyped]]
-    ])
+    ]])
   }
   def self.struct(bbox, date_start, date_end, srid, demi_distance)
     data_start, data_end = OverspassLogicalHistory.fetch_osm_at_date(bbox, date_start, date_end)
     data_start = OverspassLogicalHistory.overpass_to_geojson(data_start, srid)
     data_end = OverspassLogicalHistory.overpass_to_geojson(data_end, srid)
 
-    conf = Conflation.conflate(data_start, data_end, demi_distance)
+    conf_group = Conflation.conflate_cluster(data_start, data_end, demi_distance)
 
     objects = (data_start + data_end).index_by{ |e| id(e) }
-    links = conf.collect{ |c|
-      {
-        action: 'reject',
-        # matches: [],
-        before: id(c.before),
-        after: id(c.after),
-        diff_attribs: c.diff_attribs.presence,
-        diff_tags: c.diff_tags.presence,
-      }.compact
+    conf_group.collect { |conf|
+      links = conf.collect{ |c|
+        {
+          action: 'reject',
+          # matches: [],
+          before: id(c.before),
+          after: id(c.after),
+          diff_attribs: c.diff_attribs.presence,
+          diff_tags: c.diff_tags.presence,
+        }.compact
+      }
+      os = conf.collect { |l|
+        [
+          ([T.must(id(l.before)), T.must(objects[id(l.before)])] if !l.before.nil?),
+          ([T.must(id(l.after)), T.must(objects[id(l.after)])] if !l.after.nil?),
+        ]
+      }.flatten(1).compact.to_h
+      [os, links]
     }
-
-    [objects, links]
   end
 
   sig {
     params(
-      objects: T::Hash[String, OSMObject],
+      objects_links_groups: T::Array[[T::Hash[String, OSMObject], T::Array[T::Hash[Symbol, T.nilable(String)]]]],
       bbox: [Float, Float, Float, Float],
-      links: T::Array[T::Hash[Symbol, T.nilable(String)]],
     ).returns(T::Hash[String, T.untyped])
   }
-  def self.to_geojson(objects, bbox, links)
+  def self.to_geojson(objects_links_groups, bbox)
     {
       type: 'FeatureCollection',
       bbox: bbox,
-      features: objects.collect{ |id, feature|
-        geojson = feature.to_geojson
-        geojson['id'] = id
-        geojson
-      },
+      features: objects_links_groups.each_with_index.collect{ |objects_links, index|
+        objects_links[0].collect{ |id, feature|
+          geojson = feature.to_geojson
+          geojson[:properties]['links'] = index
+          geojson['id'] = id
+          geojson
+        }
+      }.flatten(1),
       metadata: {
-        links: links,
+        links: objects_links_groups.each_with_index.to_h{ |objects_links, index| [index, objects_links[1]] },
         changesets: [],
       },
     }

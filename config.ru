@@ -14,11 +14,11 @@ class App < Hanami::API
     date_start = params[:date_start] || '2023-01-01T00:00:00Z' # format ISO 8601
     date_end = params[:date_end] || '2024-09-01T00:00:00Z' # format ISO 8601
 
-    objects, links = OverspassLogicalHistory.struct(bbox, date_start, date_end, srid, demi_distance)
+    objects_links_groups = OverspassLogicalHistory.struct(bbox, date_start, date_end, srid, demi_distance)
 
     bbox = bbox.split(',').map(&:to_f)
     bbox = [bbox[1], bbox[0], bbox[3], bbox[2]]
-    body = OverspassLogicalHistory.to_geojson(objects, bbox, links).to_json
+    body = OverspassLogicalHistory.to_geojson(objects_links_groups, bbox).to_json
 
     [
       200,

@@ -7,6 +7,8 @@ require 'set'
 require 'rgeo'
 require 'rgeo/geo_json'
 require 'rgeo/proj4'
+require 'rgl/implicit'
+require 'rgl/connected_components'
 require 'active_support/core_ext/enumerable'
 require './logical_history/distance_hausdorff'
 require './logical_history/refs'
@@ -473,6 +475,51 @@ module LogicalHistory
     def self.conflate_with_simplification(befores, afters, demi_distance)
       paired = conflate(befores, afters, demi_distance)
       conflate_merge_deleted_created(paired)
+    end
+
+    sig {
+      params(
+        befores: T::Enumerable[OSMObject],
+        afters: T::Enumerable[OSMObject],
+        demi_distance: Float,
+      ).returns(T::Array[ConflationsNilable])
+    }
+    def self.conflate_cluster(befores, afters, demi_distance)
+      links = conflate_with_simplification(befores, afters, demi_distance)
+
+      vertices = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[[String, Integer], T::Array[ConflationNilable]])
+      links.each{ |i|
+        if !i.before.nil?
+          vertices[[T.must(i.before).objtype, T.must(i.before).id]]
+          vertices[[T.must(i.before).objtype, T.must(i.before).id]] << i
+        end
+        if !i.after.nil?
+          vertices[[T.must(i.after).objtype, T.must(i.after).id]]
+          vertices[[T.must(i.after).objtype, T.must(i.after).id]] << i
+        end
+      }
+
+      graph = RGL::ImplicitGraph.new { |g|
+        g.vertex_iterator { |b|
+          vertices.keys.each(&b)
+        }
+        g.adjacent_iterator { |x, b|
+          T.must(vertices[x]).each { |a|
+            b.call([T.must(a.before).objtype, T.must(a.before).id]) if !a.before.nil?
+            b.call([T.must(a.after).objtype, T.must(a.after).id]) if !a.after.nil?
+          }
+        }
+        g.directed = false
+      }
+
+      links_components = []
+      graph.each_connected_component{ |component_vertices|
+        links_components << component_vertices.collect{ |vertex|
+          vertices[vertex]
+        }.flatten(1).uniq
+      }
+
+      links_components
     end
   end
 end
