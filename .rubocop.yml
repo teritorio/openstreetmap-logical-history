@@ -113,3 +113,9 @@ Style/NestedTernaryOperator:
 
 Style/MultilineTernaryOperator:
   Enabled: false
+
+Style/ParenthesesAroundCondition:
+  Enabled: false
+
+Style/RedundantParentheses:
+  Enabled: false

@@ -15,7 +15,7 @@ module OverspassLogicalHistory
   extend T::Sig
 
   class OSMObject < LogicalHistory::OSMObject
-    sig { returns(T::Hash[String, T.untyped]) }
+    sig { returns(T::Hash[T.any(String, Symbol), T.untyped]) }
     def to_geojson
       {
         type: 'Feature',

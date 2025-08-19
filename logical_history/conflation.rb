@@ -23,7 +23,7 @@ module LogicalHistory
     const :objtype, String
     const :id, Integer
     const :geom, String
-    prop :_geos, T.nilable(RGeo::Feature::Geometry)
+    prop :geos, T.nilable(RGeo::Feature::Geometry)
     const :geos_factory, T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry))
     prop :geom_distance, T.nilable(T.any(Float, Integer))
     const :deleted, T::Boolean
@@ -37,12 +37,12 @@ module LogicalHistory
 
     sig { returns(T.nilable(RGeo::Feature::Geometry)) }
     def geos
-      if @_geos.nil? && !@has_geos
+      if @geos.nil? && !@has_geos
         @has_geos = true
-        @_geos = geos_factory.call(geom)
+        @geos = geos_factory.call(geom)
       end
 
-      @_geos
+      @geos
     end
 
     sig { overridable.params(other: OSMObject).returns(T::Boolean) }
@@ -279,11 +279,11 @@ module LogicalHistory
       remaning_before = T.let(nil, T.nilable(OSMObject))
       remaning_after = T.let(nil, T.nilable(OSMObject))
       if !T.unsafe(remaning_before_geom).nil?
-        remaning_before = key_min[0].with(_geos: remaning_before_geom)
+        remaning_before = key_min[0].with(geos: remaning_before_geom)
         parts << [[remaning_before], afters]
       end
       if !T.unsafe(remaning_after_geom).nil?
-        remaning_after = key_min[1].with(_geos: remaning_after_geom)
+        remaning_after = key_min[1].with(geos: remaning_after_geom)
         parts << [befores, [remaning_after]]
       end
       if !remaning_before.nil? && !remaning_after.nil?
@@ -363,8 +363,8 @@ module LogicalHistory
       }.values.collect{ |group|
         # Merge geometry parts with same before and after objects
         T.must(group.reduce{ |sum, conflate|
-          sum.before = sum.before.with(_geos: T.must(sum.before.geos).union(conflate.before.geos))
-          sum.after = sum.after.with(_geos: T.must(sum.after.geos).union(conflate.after.geos))
+          sum.before = sum.before.with(geos: T.must(sum.before.geos).union(conflate.before.geos))
+          sum.after = sum.after.with(geos: T.must(sum.after.geos).union(conflate.after.geos))
           sum
         })
       }
@@ -428,7 +428,7 @@ module LogicalHistory
         else
           # Merge remaining geom with already conflated main part
           p = block.call(paired)
-          union = p.with(_geos: T.must(p.geos).union(b.geos))
+          union = p.with(geos: T.must(p.geos).union(b.geos))
           paired.send("#{key}=", union)
           false
         end
