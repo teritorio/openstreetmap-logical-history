@@ -43,10 +43,7 @@ module OverspassLogicalHistory
       bbox: String,
       date_start: String,
       date_end: String
-    ).returns([
-      T::Array[T::Hash[String, T.untyped]],
-      T::Array[T::Hash[String, T.untyped]]
-    ])
+    ).returns(T.nilable(String))
   }
   def self.fetch_osm_at_date(bbox, date_start, date_end)
     overpass_url = 'https://overpass-api.de/api/interpreter'
@@ -65,7 +62,19 @@ module OverspassLogicalHistory
 
     raise response.body if !response.is_a?(Net::HTTPSuccess)
 
-    h = Hash.from_xml(response.body)
+    response.body
+  end
+
+  sig {
+    params(
+      xml: String,
+    ).returns([
+      T::Array[T::Hash[String, T.untyped]],
+      T::Array[T::Hash[String, T.untyped]]
+    ])
+  }
+  def self.parse_xml(xml)
+    h = Hash.from_xml(xml)
     old = []
     new = []
     h.dig('osm', 'action')&.collect{ |action|
@@ -77,6 +86,8 @@ module OverspassLogicalHistory
       when 'modify'
         old << action['old']
         new << action['new']
+      else
+        raise "Unknown action type: #{action['type']}"
       end
     }
     [old, new]
@@ -164,7 +175,10 @@ module OverspassLogicalHistory
     ]])
   }
   def self.struct(bbox, date_start, date_end, srid, demi_distance)
-    data_start, data_end = OverspassLogicalHistory.fetch_osm_at_date(bbox, date_start, date_end)
+    xml = OverspassLogicalHistory.fetch_osm_at_date(bbox, date_start, date_end)
+    raise 'Empty response from Overpass API' if xml.nil? || xml.empty?
+
+    data_start, data_end = parse_xml(xml)
     data_start = OverspassLogicalHistory.overpass_to_geojson(data_start, srid)
     data_end = OverspassLogicalHistory.overpass_to_geojson(data_end, srid)
 
