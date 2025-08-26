@@ -312,7 +312,7 @@ module LogicalHistory
       distance_matrix = conflate_matrix(befores, afters, demi_distance)
 
       paired = T.let([], Conflations)
-      until distance_matrix.empty? || befores.empty? || afters.empty?
+      until distance_matrix.empty?
         key_min, dist = T.must(distance_matrix.to_a.min_by{ |_keys, coefs| coefs[0] + coefs[1][0] + coefs[2] })
         match = Conflation.new(
           before: key_min[0],
@@ -326,7 +326,7 @@ module LogicalHistory
         befores.delete(key_min[0])
         afters.delete(key_min[1])
 
-        distance_matrix = distance_matrix.select{ |k, _v| (k & key_min).empty? }
+        distance_matrix = distance_matrix.select{ |k, _v| k[0] != key_min[0] && k[1] != key_min[1] }
 
         # Add the remaining geom parts to the matrix
         new_befores = T.let(Set.new, T::Set[OSMObject])
