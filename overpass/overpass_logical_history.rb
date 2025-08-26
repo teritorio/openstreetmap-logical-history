@@ -149,11 +149,11 @@ module OverspassLogicalHistory
 
   ID_CACHE = T.let(Hash.new { |h, k| h[k] = h.size }, T::Hash[String, Integer])
 
-  sig { params(object: T.nilable(LogicalHistory::OSMObject)).returns(T.nilable(Integer)) }
-  def self.id(object)
+  sig { params(object: T.nilable(LogicalHistory::OSMObject), is_before: T::Boolean).returns(T.nilable(Integer)) }
+  def self.id(object, is_before)
     return nil if object.nil?
 
-    ID_CACHE["#{object.objtype[0]}#{object.id}_#{object.version}"]
+    ID_CACHE["#{is_before ? 'b' : 'a'}#{object.objtype[0]}#{object.id}_#{object.version}"]
   end
 
   sig { params(object: LogicalHistory::OSMObject).returns(String) }
@@ -184,22 +184,22 @@ module OverspassLogicalHistory
 
     conf_group = Conflation.conflate_cluster(data_start, data_end, demi_distance)
 
-    objects = (data_start + data_end).index_by{ |e| id(e) }
+    objects = data_start.index_by{ |e| id(e, true) }.merge(data_end.index_by{ |e| id(e, false) })
     conf_group.collect { |conf|
       links = conf.collect{ |c|
         {
           action: 'reject',
           # matches: [],
-          before: id(c.before),
-          after: id(c.after),
+          before: id(c.before, true),
+          after: id(c.after, false),
           diff_attribs: c.diff_attribs.presence,
           diff_tags: c.diff_tags.presence,
         }.compact
       }
       os = conf.collect { |l|
         [
-          ([T.must(id(l.before)), T.must(objects[id(l.before)])] if !l.before.nil?),
-          ([T.must(id(l.after)), T.must(objects[id(l.after)])] if !l.after.nil?),
+          ([T.must(id(l.before, true)), T.must(objects[id(l.before, true)])] if !l.before.nil?),
+          ([T.must(id(l.after, false)), T.must(objects[id(l.after, false)])] if !l.after.nil?),
         ]
       }.flatten(1).compact.to_h
       [os, links]
