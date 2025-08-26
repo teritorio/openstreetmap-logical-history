@@ -354,11 +354,17 @@ module LogicalHistory
     sig {
       params(
         paired: Conflations,
-      ).returns(Conflations)
+        befores: T::Set[OSMObject],
+        afters: T::Set[OSMObject],
+      ).returns([
+        Conflations,
+        T::Set[OSMObject],
+        T::Set[OSMObject],
+      ])
     }
-    def self.conflate_uniq(paired)
+    def self.conflate_uniq(paired, befores, afters)
       # Make conflation (before, after) uniq
-      paired.group_by{ |p|
+      r = paired.group_by{ |p|
         [p.before.objtype, p.before.id, p.after.objtype, p.after.id]
       }.values.collect{ |group|
         # Merge geometry parts with same before and after objects
@@ -368,6 +374,8 @@ module LogicalHistory
           sum
         })
       }
+
+      [r, befores, afters]
     end
 
     sig {
@@ -416,7 +424,7 @@ module LogicalHistory
         block: T.proc.params(c: Conflation).returns(OSMObject)
       ).returns([Conflations, T::Enumerable[OSMObject]])
     }
-    def self.conflate_merge_remaning_parts(paireds, remeainings, key, &block)
+    def self.conflate_merge_remaning_parts_side(paireds, remeainings, key, &block)
       paired_index = paireds.group_by{ |p|
         o = block.call(p)
         [o.objtype, o.id]
@@ -439,6 +447,24 @@ module LogicalHistory
 
     sig {
       params(
+        paired: Conflations,
+        befores: T::Set[OSMObject],
+        afters: T::Set[OSMObject],
+      ).returns([
+        Conflations,
+        T::Enumerable[OSMObject],
+        T::Enumerable[OSMObject],
+      ])
+    }
+    def self.conflate_merge_remaning_parts(paired, befores, afters)
+      paired, befores = conflate_merge_remaning_parts_side(paired, befores, :before, &:before)
+      paired, afters = conflate_merge_remaning_parts_side(paired, afters, :after, &:after)
+
+      [paired, befores, afters]
+    end
+
+    sig {
+      params(
         befores: T::Enumerable[OSMObject],
         afters: T::Enumerable[OSMObject],
         demi_distance: Float,
@@ -452,10 +478,8 @@ module LogicalHistory
       paired_by_refs, befores, afters = conflate_by_refs(befores, afters, afters_index)
       paired_by_distance, befores, afters = conflate_core(befores, afters, afters_index, demi_distance)
 
-      paired_by_distance = conflate_uniq(paired_by_distance)
-
-      paired_by_distance, befores = conflate_merge_remaning_parts(paired_by_distance, befores, :before, &:before)
-      paired_by_distance, afters = conflate_merge_remaning_parts(paired_by_distance, afters, :after, &:after)
+      paired_by_distance, befores, afters = conflate_uniq(paired_by_distance, befores, afters)
+      paired_by_distance, befores, afters = conflate_merge_remaning_parts(paired_by_distance, befores, afters)
 
       (
         paired_by_refs +
