@@ -22,7 +22,6 @@ module OverspassLogicalHistory
         properties: {
           objtype: objtype,
           id: id,
-          geom_distance: geom_distance,
           deleted: deleted,
           members: members,
           version: version,
