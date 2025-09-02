@@ -39,13 +39,14 @@ module OverspassLogicalHistory
 
   sig {
     params(
-      bbox: String,
+      bbox: [Float, Float, Float, Float],
       date_start: String,
       date_end: String
     ).returns(T.nilable(String))
   }
   def self.fetch_osm_at_date(bbox, date_start, date_end)
     overpass_url = 'https://overpass-api.de/api/interpreter'
+    bbox = bbox.join(',')
 
     overpass_query = <<-QUERY
     [diff:"#{date_start}","#{date_end}"];
@@ -163,7 +164,7 @@ module OverspassLogicalHistory
 
   sig {
     params(
-      bbox: String,
+      bbox: [Float, Float, Float, Float],
       date_start: String,
       date_end: String,
       srid: Integer,
