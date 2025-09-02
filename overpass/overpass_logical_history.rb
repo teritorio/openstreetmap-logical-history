@@ -40,19 +40,20 @@ module OverspassLogicalHistory
   sig {
     params(
       bbox: [Float, Float, Float, Float],
+      selector: String,
       date_start: String,
       date_end: String
     ).returns(T.nilable(String))
   }
-  def self.fetch_osm_at_date(bbox, date_start, date_end)
+  def self.fetch_osm_at_date(bbox, selector, date_start, date_end)
     overpass_url = 'https://overpass-api.de/api/interpreter'
     bbox = bbox.join(',')
 
     overpass_query = <<-QUERY
     [diff:"#{date_start}","#{date_end}"];
     (
-      node(#{bbox});
-      way(#{bbox});
+      node#{selector}(#{bbox});
+      way#{selector}(#{bbox});
     );
     out meta geom;
     QUERY
@@ -77,7 +78,9 @@ module OverspassLogicalHistory
     h = Hash.from_xml(xml)
     old = []
     new = []
-    h.dig('osm', 'action')&.collect{ |action|
+    actions = h.dig('osm', 'action')
+    actions = [actions] if actions.is_a?(Hash)
+    actions&.collect{ |action|
       case action['type']
       when 'delete'
         old << action['old']
@@ -165,6 +168,7 @@ module OverspassLogicalHistory
   sig {
     params(
       bbox: [Float, Float, Float, Float],
+      selector: String,
       date_start: String,
       date_end: String,
       srid: Integer,
@@ -174,8 +178,8 @@ module OverspassLogicalHistory
       T::Array[T::Hash[Symbol, T.untyped]]
     ]])
   }
-  def self.struct(bbox, date_start, date_end, srid, demi_distance)
-    xml = OverspassLogicalHistory.fetch_osm_at_date(bbox, date_start, date_end)
+  def self.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+    xml = OverspassLogicalHistory.fetch_osm_at_date(bbox, selector, date_start, date_end)
     raise 'Empty response from Overpass API' if xml.nil? || xml.empty?
 
     data_start, data_end = parse_xml(xml)
