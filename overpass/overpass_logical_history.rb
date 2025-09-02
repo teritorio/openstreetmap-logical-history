@@ -192,7 +192,7 @@ module OverspassLogicalHistory
     conf_group.collect { |conf|
       links = conf.collect{ |c|
         {
-          action: 'reject',
+          action: 'diff',
           # matches: [],
           before: id(c.before, true),
           after: id(c.after, false),
