@@ -207,7 +207,10 @@ module OverspassLogicalHistory
 
   sig {
     params(
-      objects_links_groups: T::Array[[T::Hash[String, OSMObject], T::Array[T::Hash[Symbol, T.nilable(String)]]]],
+      objects_links_groups: T::Array[[
+        T::Hash[String, OSMObject],
+        T::Array[T::Hash[Symbol, T.nilable(String)]]
+      ]],
       bbox: [Float, Float, Float, Float],
     ).returns(T::Hash[String, T.untyped])
   }
