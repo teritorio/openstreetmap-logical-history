@@ -1,0 +1,7 @@
+.bundle
+.git
+.ruby-lsp
+.env
+.env.template
+.github
+sorbet
