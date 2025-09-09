@@ -17,8 +17,8 @@ class App < Hanami::API
     bbox = [T.must(bbox[1]), T.must(bbox[0]), T.must(bbox[3]), T.must(bbox[2])]
 
     selector = params[:selector] || '' # e.g. "[highway=residential]"
-    date_start = params[:date_start] || '2023-01-01T00:00:00Z' # format ISO 8601
-    date_end = params[:date_end] || '2024-09-01T00:00:00Z' # format ISO 8601
+    date_start = params[:date_start] || '2023-08-01T00:00:00Z' # format ISO 8601
+    date_end = params[:date_end] || '2023-09-30T00:00:00Z' # format ISO 8601
 
     objects_links_groups = OverspassLogicalHistory.struct(bbox, selector, date_start, date_end, srid, demi_distance)
 
@@ -32,6 +32,8 @@ class App < Hanami::API
       },
       body
     ]
+  rescue RuntimeError => e
+    [400, {}, e.message]
   end
 end
 

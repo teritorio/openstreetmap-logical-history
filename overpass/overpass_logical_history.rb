@@ -46,6 +46,10 @@ module OverspassLogicalHistory
     ).returns(T.nilable(String))
   }
   def self.fetch_osm_at_date(bbox, selector, date_start, date_end)
+    raise 'Date range too large (max 90 days)' if Date.parse(date_end) - Date.parse(date_start) > 90
+    raise 'Bounding box too large (max 0.2 degrees wide)' if bbox[2] - bbox[0] > 0.2
+    raise 'Bounding box too large (max 0.2 degrees wide)' if bbox[3] - bbox[1] > 0.2
+
     overpass_url = 'https://overpass-api.de/api/interpreter'
     bbox = bbox.join(',')
 
@@ -64,6 +68,8 @@ module OverspassLogicalHistory
     raise response.body if !response.is_a?(Net::HTTPSuccess)
 
     response.body
+  rescue StandardError => e
+    raise e.message
   end
 
   sig {
