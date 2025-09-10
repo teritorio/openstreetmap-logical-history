@@ -101,23 +101,20 @@ module LogicalHistory
         # - lat
         # - lon
         # - members
-        %i[deleted geom_distance].collect { |attrib|
-          next if before.send(attrib) != after.send(attrib)
-
+        %i[deleted geom_distance].select{ |attrib|
+          before.send(attrib) != after.send(attrib)
+        }.to_h { |attrib|
           [attrib.to_s, [['diff', nil, nil]]]
-        }.compact.to_h
+        }
       end
 
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
       def diff_tags
-        (before.tags.keys + after.tags.keys).uniq.collect{ |tag|
-          next if (before.tags[tag] || tag) != (after.tags[tag] || tag)
-
-          [
-            tag,
-            [['diff', nil, nil]]
-          ]
-        }.compact.to_h
+        (before.tags.keys + after.tags.keys).uniq.select{ |key|
+          before.tags[key] != after.tags[key]
+        }.to_h{ |key|
+          [key, [['diff', nil, nil]]]
+        }
       end
     end
 
@@ -146,27 +143,24 @@ module LogicalHistory
         # - lat
         # - lon
         # - members
-        %i[deleted geom_distance].collect { |attrib|
-          next if before&.send(attrib) == after&.send(attrib)
-
+        %i[deleted geom_distance].select{ |attrib|
+          before&.send(attrib) == after&.send(attrib)
+        }.to_h { |attrib|
           if after&.geom_distance.nil?
             [attrib.to_s, [['diff', nil, nil]]]
           else
             [attrib.to_s, [['diff', nil, { dist: after&.geom_distance }]]]
           end
-        }.compact.to_h
+        }
       end
 
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
       def diff_tags
-        ((before&.tags&.keys || []) + (after&.tags&.keys || [])).uniq.collect{ |tag|
-          next if (before&.tags&.[](tag) || tag) == (after&.tags&.[](tag) || tag)
-
-          [
-            tag,
-            [['diff', nil, nil]]
-          ]
-        }.compact.to_h
+        ((before&.tags&.keys || []) + (after&.tags&.keys || [])).uniq.select{ |key|
+          before&.tags&.[](key) == after&.tags&.[](key)
+        }.to_h{ |key|
+          [key, [['diff', nil, nil]]]
+        }
       end
     end
 
