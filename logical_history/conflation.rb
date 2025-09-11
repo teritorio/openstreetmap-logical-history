@@ -191,14 +191,16 @@ module LogicalHistory
       uniq_afters_refs = afters_refs.keys
 
       conflate = (uniq_befores_refs & uniq_afters_refs).collect{ |ref|
-        befores.delete(T.must(befores_refs[ref]))
-        afters.delete(T.must(afters_refs[ref]))
+        before = T.must(afters_refs[ref])
+        after = T.must(befores_refs[ref])
+        befores.delete(after)
+        afters.delete(before)
 
         before_key = [T.must(befores_refs[ref]).objtype, T.must(befores_refs[ref]).id]
         Conflation.new(
-          before: T.must(befores_refs[ref]),
+          before: after,
           before_at_now: afters_index[before_key],
-          after: T.must(afters_refs[ref]),
+          after: before,
         )
       }
 
@@ -480,7 +482,13 @@ module LogicalHistory
         paired_by_distance +
         befores.collect{ |b| ConflationNilableOnly.new(before: b, before_at_now: afters_index[[b.objtype, b.id]]) } +
         afters.collect{ |a| ConflationNilableOnly.new(after: a) }
-      )
+      ).collect{ |c|
+        # Add missing geom_distance, for conflation without requering distance
+        if !c.after.nil? && !c.before.nil? && T.must(c.after).geom_distance.nil?
+          T.must(c.after).geom_distance = T.must(LogicalHistory::Geom.geom_distance(T.must(c.before&.geos), T.must(c.after&.geos), demi_distance))[0]
+        end
+        c
+      }
     end
 
     sig {
