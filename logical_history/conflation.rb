@@ -213,11 +213,11 @@ module LogicalHistory
         afters: T::Set[OSMObject],
         demi_distance: Float,
       ).returns(
-        T::Hash[[OSMObject, OSMObject], [Float, [Float, T.nilable(RGeo::Feature::Geometry), T.nilable(RGeo::Feature::Geometry)], Float]],
+        T::Hash[[OSMObject, OSMObject], [Float, LogicalHistory::Geom::DistanceMeusure, Float]],
       )
     }
     def self.conflate_matrix(befores, afters, demi_distance)
-      distance_matrix = T.let({}, T::Hash[[OSMObject, OSMObject], [Float, [Float, T.nilable(RGeo::Feature::Geometry), T.nilable(RGeo::Feature::Geometry)], Float]])
+      distance_matrix = T.let({}, T::Hash[[OSMObject, OSMObject], [Float, LogicalHistory::Geom::DistanceMeusure, Float]])
 
       befores.each{ |b|
         next if T.unsafe(b.geos).nil?
@@ -258,7 +258,7 @@ module LogicalHistory
         key_min: [OSMObject, OSMObject],
         befores: T::Set[OSMObject],
         afters: T::Set[OSMObject],
-        dist_geom: [Float, T.nilable(RGeo::Feature::Geometry), T.nilable(RGeo::Feature::Geometry)],
+        dist_geom: LogicalHistory::Geom::DistanceMeusure,
       ).returns(T::Array[[
         T::Enumerable[OSMObject],
         T::Enumerable[OSMObject]
