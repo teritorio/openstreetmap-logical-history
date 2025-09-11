@@ -43,7 +43,11 @@ class App < Hanami::API
       body
     ]
   rescue RuntimeError => e
-    [400, {}, e.message]
+    [
+      400,
+      { 'Access-Control-Allow-Origin' => '*' },
+      e.message
+    ]
   end
 end
 
