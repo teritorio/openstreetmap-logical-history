@@ -4,5 +4,7 @@ services:
     image: ghcr.io/teritorio/openstreetmap-logical-history:master
     ports:
       - 9292:9292
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
     command: bundle exec rackup --host 0.0.0.0
     restart: unless-stopped

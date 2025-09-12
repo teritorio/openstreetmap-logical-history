@@ -134,6 +134,9 @@ GEM
     ruby2_keywords (0.0.5)
     safe_type (1.1.1)
     securerandom (0.4.1)
+    sentry-ruby (5.27.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.0.2)
     sorbet (0.5.12414)
       sorbet-static (= 0.5.12414)
     sorbet-coerce (0.7.0)
@@ -208,6 +211,7 @@ DEPENDENCIES
   rgl
   rubocop
   ruby-lsp
+  sentry-ruby (~> 5.27)
   sorbet
   sorbet-rails
   sorbet-runtime

@@ -1,12 +1,26 @@
 # frozen_string_literal: true
 
+require 'sentry-ruby'
 require 'bundler/setup'
 require 'hanami/api'
 require 'moneta'
 require 'json'
 require_relative 'overpass/overpass_logical_history'
 
+if ENV['SENTRY_DSN'].present?
+  puts ENV['SENTRY_DSN'].inspect
+  Sentry.init do |config|
+    config.dsn = ENV['SENTRY_DSN']
+    # enable performance monitoring
+    config.traces_sample_rate = 1.0
+    # get breadcrumbs from logs
+    config.breadcrumbs_logger = [:http_logger]
+  end
+end
+
 class App < Hanami::API
+  use Sentry::Rack::CaptureExceptions
+
   cache = Moneta.build do
     adapter :LRUHash
   end
