@@ -2,10 +2,15 @@
 
 require 'bundler/setup'
 require 'hanami/api'
+require 'moneta'
 require 'json'
 require_relative 'overpass/overpass_logical_history'
 
 class App < Hanami::API
+  cache = Moneta.build do
+    adapter :LRUHash
+  end
+
   get '/api/0.1/overpass_logical_history' do
     srid = params[:srid] || 2154
     demi_distance = params[:distance] || 200.0 # m
@@ -36,9 +41,16 @@ class App < Hanami::API
       date_end = n.iso8601
     end
 
-    objects_links_groups = OverspassLogicalHistory.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+    cache_key = [bbox, selector, date_start, date_end].join('/')
+    body = cache.load(cache_key)
+    if body.nil?
+      objects_links_groups = OverspassLogicalHistory.struct(bbox, selector, date_start, date_end, srid, demi_distance)
 
-    body = OverspassLogicalHistory.to_geojson(objects_links_groups, bbox).to_json
+      Moneta.new(:File, dir: 'moneta')
+      body = OverspassLogicalHistory.to_geojson(objects_links_groups, bbox).to_json
+
+      cache.store(cache_key, body, expires_in: 3600) # 1 hour
+    end
 
     [
       200,
