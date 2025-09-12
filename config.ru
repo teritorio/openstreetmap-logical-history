@@ -28,7 +28,13 @@ class App < Hanami::API
 
     selector = params[:selector] || '' # e.g. "[highway=residential]"
     date_start = params[:date_start]
-    date_end = params[:date_end] || Time.now.utc.iso8601
+    date_end = params[:date_end]
+    if date_end.nil? || date_end.empty?
+      # Now, trunced to minute to allow caching
+      n = Time.now.utc
+      n -= n.sec
+      date_end = n.iso8601
+    end
 
     objects_links_groups = OverspassLogicalHistory.struct(bbox, selector, date_start, date_end, srid, demi_distance)
 
