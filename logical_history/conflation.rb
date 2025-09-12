@@ -90,7 +90,7 @@ module LogicalHistory
         [before, before_at_now, after]
       end
 
-      sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
+      sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), T.untyped]]]) }
       def diff_attribs
         # Unchecked attribs
         # - version
@@ -104,7 +104,11 @@ module LogicalHistory
         %i[deleted geom_distance].select{ |attrib|
           before.send(attrib) != after.send(attrib)
         }.to_h { |attrib|
-          [attrib.to_s, [['diff', nil, nil]]]
+          if attrib == :geom_distance
+            ['geom', [['diff', nil, after.geom_distance.nil? ? nil : { dist: after.geom_distance }]]]
+          else
+            [attrib.to_s, [['diff', nil, nil]]]
+          end
         }
       end
 
@@ -146,10 +150,10 @@ module LogicalHistory
         %i[deleted geom_distance].select{ |attrib|
           before&.send(attrib) == after&.send(attrib)
         }.to_h { |attrib|
-          if after&.geom_distance.nil?
-            [attrib.to_s, [['diff', nil, nil]]]
+          if attrib == :geom_distance
+            ['geom', [['diff', nil, after&.geom_distance.nil? ? nil : { dist: after&.geom_distance }]]]
           else
-            [attrib.to_s, [['diff', nil, { dist: after&.geom_distance }]]]
+            [attrib.to_s, [['diff', nil, nil]]]
           end
         }
       end
@@ -315,8 +319,6 @@ module LogicalHistory
           before_at_now: afters_index[[key_min[0].objtype, key_min[0].id]],
           after: key_min[1]
         )
-        match.after.geom_distance = match.before.geos&.distance(match.after.geos)
-        match.after.geom_distance = nil if match.after.geom_distance == 0
         paired << match
 
         befores.delete(key_min[0])
@@ -483,9 +485,13 @@ module LogicalHistory
         befores.collect{ |b| ConflationNilableOnly.new(before: b, before_at_now: afters_index[[b.objtype, b.id]]) } +
         afters.collect{ |a| ConflationNilableOnly.new(after: a) }
       ).collect{ |c|
-        # Add missing geom_distance, for conflation without requering distance
-        if !c.after.nil? && !c.before.nil? && T.must(c.after).geom_distance.nil?
-          T.must(c.after).geom_distance = T.must(LogicalHistory::Geom.geom_distance(T.must(c.before&.geos), T.must(c.after&.geos), demi_distance))[0]
+        if !c.before.nil? && !c.after.nil?
+          after = T.must(c.after)
+          if after.geom_distance.nil?
+            before = T.must(c.before)
+            after.geom_distance = before.geos&.distance(after.geos)
+            after.geom_distance = nil if after.geom_distance == 0
+          end
         end
         c
       }
