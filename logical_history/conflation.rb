@@ -105,9 +105,9 @@ module LogicalHistory
           before.send(attrib) != after.send(attrib)
         }.to_h { |attrib|
           if attrib == :geom_distance
-            ['geom', [['diff', nil, after.geom_distance.nil? ? nil : { dist: after.geom_distance }]]]
+            ['geom', [['reject', nil, after.geom_distance.nil? ? nil : { dist: after.geom_distance }]]]
           else
-            [attrib.to_s, [['diff', nil, nil]]]
+            [attrib.to_s, [['reject', nil, nil]]]
           end
         }
       end
@@ -117,7 +117,7 @@ module LogicalHistory
         (before.tags.keys + after.tags.keys).uniq.select{ |key|
           before.tags[key] != after.tags[key]
         }.to_h{ |key|
-          [key, [['diff', nil, nil]]]
+          [key, [['reject', nil, nil]]]
         }
       end
     end
@@ -151,9 +151,9 @@ module LogicalHistory
           before&.send(attrib) == after&.send(attrib)
         }.to_h { |attrib|
           if attrib == :geom_distance
-            ['geom', [['diff', nil, after&.geom_distance.nil? ? nil : { dist: after&.geom_distance }]]]
+            ['geom', [['reject', nil, after&.geom_distance.nil? ? nil : { dist: after&.geom_distance }]]]
           else
-            [attrib.to_s, [['diff', nil, nil]]]
+            [attrib.to_s, [['reject', nil, nil]]]
           end
         }
       end
@@ -163,7 +163,7 @@ module LogicalHistory
         ((before&.tags&.keys || []) + (after&.tags&.keys || [])).uniq.select{ |key|
           before&.tags&.[](key) == after&.tags&.[](key)
         }.to_h{ |key|
-          [key, [['diff', nil, nil]]]
+          [key, [['reject', nil, nil]]]
         }
       end
     end
