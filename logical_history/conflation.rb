@@ -47,12 +47,13 @@ module LogicalHistory
 
     sig { overridable.params(other: OSMObject).returns(T::Boolean) }
     def eql?(other)
-      objtype == other.objtype && id == other.id && geom == other.geom
+      objtype == other.objtype && id == other.id && version == other.version && geom == other.geom
     end
+    alias == eql?
 
     sig { overridable.returns(Integer) }
     def hash
-      [objtype, id, geom].hash
+      [objtype, id, version, geom].hash
     end
 
     sig {
