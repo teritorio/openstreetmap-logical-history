@@ -217,11 +217,17 @@ module LogicalHistory
         afters: T::Set[OSMObject],
         demi_distance: Float,
       ).returns(
-        T::Hash[[OSMObject, OSMObject], [Float, LogicalHistory::Geom::DistanceMeusure, Float]],
+        T::Hash[
+          [OSMObject, OSMObject],
+          [LogicalHistory::Tags::DistanceMeusure, LogicalHistory::Geom::DistanceMeusure, Float]
+        ],
       )
     }
     def self.conflate_matrix(befores, afters, demi_distance)
-      distance_matrix = T.let({}, T::Hash[[OSMObject, OSMObject], [Float, LogicalHistory::Geom::DistanceMeusure, Float]])
+      distance_matrix = T.let({}, T::Hash[
+        [OSMObject, OSMObject],
+        [LogicalHistory::Tags::DistanceMeusure, LogicalHistory::Geom::DistanceMeusure, Float]
+      ])
 
       befores.each{ |b|
         next if T.unsafe(b.geos).nil?
@@ -313,7 +319,7 @@ module LogicalHistory
 
       paired = T.let([], Conflations)
       until distance_matrix.empty?
-        key_min, dist = T.must(distance_matrix.to_a.min_by{ |_keys, coefs| coefs[0] + coefs[1][0] + coefs[2] })
+        key_min, dist = T.must(distance_matrix.to_a.min_by{ |_keys, coefs| coefs[0][0] + coefs[1][0] + coefs[2] })
         match = Conflation.new(
           before: key_min[0],
           before_at_now: afters_index[[key_min[0].objtype, key_min[0].id]],
