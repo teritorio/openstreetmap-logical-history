@@ -174,41 +174,16 @@ module LogicalHistory
 
     sig {
       params(
-        befores: T::Set[OSMObject],
-        afters: T::Set[OSMObject],
-        afters_index: T::Hash[[String, Integer], OSMObject],
-      ).returns([
-        Conflations,
-        T::Set[OSMObject],
-        T::Set[OSMObject],
-      ])
+        before_tags: T::Hash[String, String],
+        after_tags: T::Hash[String, String],
+      ).returns(T::Boolean)
     }
-    def self.conflate_by_refs(befores, afters, afters_index)
-      befores_refs = befores.group_by{ |b| LogicalHistory::Refs.refs(b.tags) }
-      befores_refs.delete({})
-      befores_refs = befores_refs.select{ |_k, v| v.size == 1 }.transform_values{ |v| T.must(v.first) }
-      afters_refs = afters.group_by{ |a| LogicalHistory::Refs.refs(a.tags) }
-      afters_refs.delete({})
-      afters_refs = afters_refs.select{ |_k, v| v.size == 1 }.transform_values{ |v| T.must(v.first) }
+    def self.same_refs?(before_tags, after_tags)
+      before_refs = LogicalHistory::Refs.refs(before_tags).sort
+      return false if before_refs.empty?
 
-      uniq_befores_refs = befores_refs.keys
-      uniq_afters_refs = afters_refs.keys
-
-      conflate = (uniq_befores_refs & uniq_afters_refs).collect{ |ref|
-        before = T.must(afters_refs[ref])
-        after = T.must(befores_refs[ref])
-        befores.delete(after)
-        afters.delete(before)
-
-        before_key = [T.must(befores_refs[ref]).objtype, T.must(befores_refs[ref]).id]
-        Conflation.new(
-          before: after,
-          before_at_now: afters_index[before_key],
-          after: before,
-        )
-      }
-
-      [conflate, befores, afters]
+      after_refs = LogicalHistory::Refs.refs(after_tags).sort
+      before_refs == after_refs
     end
 
     sig {
@@ -238,11 +213,19 @@ module LogicalHistory
           t_dist = LogicalHistory::Tags.tags_distance(b.tags, a.tags)
           next if t_dist.nil?
 
+          same_refs = same_refs?(a.tags, b.tags)
+          if same_refs
+            # Same ref, force the distance tags to 0
+            t_dist[0] = 0.0
+          end
+
           next if T.unsafe(a.geos).nil?
 
           g_dist = (
-            if b.geos == a.geos || (b.geos&.dimension == 2 && a.geos&.dimension == 2 && befores.size == 1 && afters.size == 1)
-              # Same geom
+            if same_refs ||
+              b.geos == a.geos ||
+              (b.geos&.dimension == 2 && a.geos&.dimension == 2 && befores.size == 1 && afters.size == 1)
+              # Same refs or geom
               # or
               # Geom distance does not matter on 1x1 matrix, fast return
               [0.0, nil, nil]
@@ -479,14 +462,12 @@ module LogicalHistory
       befores = befores.to_set
       afters = afters.select{ |a| !a.deleted }.to_set
 
-      paired_by_refs, befores, afters = conflate_by_refs(befores, afters, afters_index)
       paired_by_distance, befores, afters = conflate_core(befores, afters, afters_index, demi_distance)
 
       paired_by_distance, befores, afters = conflate_uniq(paired_by_distance, befores, afters)
       paired_by_distance, befores, afters = conflate_merge_remaning_parts(paired_by_distance, befores, afters)
 
       (
-        paired_by_refs +
         paired_by_distance +
         befores.collect{ |b| ConflationNilableOnly.new(before: b, before_at_now: afters_index[[b.objtype, b.id]]) } +
         afters.collect{ |a| ConflationNilableOnly.new(after: a) }

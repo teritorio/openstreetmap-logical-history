@@ -14,7 +14,7 @@ module LogicalHistory
       ).returns(T::Hash[String, String])
     }
     def self.refs(tags)
-      tags.select{ |k, _v| k == 'ref' || k.start_with?('ref:') }
+      tags.select{ |k, _v| k == 'ref' || k.start_with?('ref:') }.to_h
     end
   end
 end
