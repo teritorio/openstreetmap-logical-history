@@ -151,7 +151,7 @@ class TestConflation < Test::Unit::TestCase
       Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
-    before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[1,0]]}', after_geom: '{"type":"LineString","coordinates":[[0,0],[0,1]]}')
+    before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[100,0]]}', after_geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}')
     assert_equal(0.5, Geom.geom_distance(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
@@ -162,8 +162,8 @@ class TestConflation < Test::Unit::TestCase
       Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
-    before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[0,1]]}', after_geom: '{"type":"LineString","coordinates":[[0,2],[0,3]]}')
-    assert_equal(0.75, Geom.geom_distance(
+    before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', after_geom: '{"type":"LineString","coordinates":[[0,200],[0,300]]}')
+    assert_equal(0.995049504950495, Geom.geom_distance(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
       @@demi_distance
@@ -396,10 +396,10 @@ class TestConflation < Test::Unit::TestCase
       'highway' => 'residential',
     }
     before = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,2]]}', tags: tags),
+      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags),
     ]
     after = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,1]]}', tags: tags),
+      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: tags),
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
