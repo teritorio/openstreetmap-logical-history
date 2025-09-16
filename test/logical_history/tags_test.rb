@@ -34,11 +34,19 @@ class TestTags < Test::Unit::TestCase
 
   sig { void }
   def test_tags_distance
-    assert_equal([0.0], Tags.tags_distance({ 'highway' => 'a' }, { 'highway' => 'a' }))
-    assert_equal([0.0], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'highway' => 'a', 'foo' => 'a' }))
-    assert_equal([0.0], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'highway' => 'a', 'foo' => 'a' }))
+    assert_equal([0.0, nil, nil], Tags.tags_distance({ 'highway' => 'a' }, { 'highway' => 'a' }))
+    assert_equal([0.25, nil, nil], Tags.tags_distance({ 'highway' => 'motorway' }, { 'highway' => 'trunk' }))
+    assert_equal([0.0, nil, nil], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'highway' => 'a', 'foo' => 'a' }))
+    assert_equal([0.0, nil, nil], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'highway' => 'a', 'foo' => 'a' }))
+    assert_equal([0.25, { 'landuse' => 'residencial' }, nil], Tags.tags_distance({ 'building' => 'house', 'landuse' => 'residencial' }, { 'building' => 'house' }))
+    assert_equal([0.25, nil, { 'landuse' => 'residencial' }], Tags.tags_distance({ 'building' => 'house' }, { 'building' => 'house', 'landuse' => 'residencial' }))
     assert_equal(nil, Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'leisure' => 'a', 'foo' => 'a' }))
     assert_equal(nil, Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'foo' => 'a' }))
-    assert_equal([0.25], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a', 'bar' => 'b' }, { 'highway' => 'a', 'foo' => 'a' }))
+    assert_equal([0.25, nil, nil], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a', 'bar' => 'b' }, { 'highway' => 'a', 'foo' => 'a' }))
+    assert_equal([0.25, { 'building' => 'b' }, nil], Tags.tags_distance({ 'highway' => 'a', 'building' => 'b' }, { 'highway' => 'a' }))
+    assert_equal([0.25, nil, { 'building' => 'b' }], Tags.tags_distance({ 'highway' => 'a' }, { 'highway' => 'a', 'building' => 'b' }))
+    assert_equal([0.375, { 'building' => 'b' }, nil], Tags.tags_distance({ 'highway' => 'motorway', 'building' => 'b' }, { 'highway' => 'trunk' }))
+    assert_equal(nil, Tags.tags_distance({ 'highway' => 'motorway', 'leisure' => 'b' }, { 'leisure' => 'c' }))
+    assert_equal([0.75, { 'leisure' => 'b', 'foo' => 'a' }, { 'leisure' => 'c', 'bar' => 'd' }], Tags.tags_distance({ 'highway' => 'a', 'leisure' => 'b', 'foo' => 'a' }, { 'highway' => 'a', 'leisure' => 'c', 'bar' => 'd' }))
   end
 end

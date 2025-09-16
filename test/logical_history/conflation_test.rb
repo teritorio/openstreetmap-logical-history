@@ -232,7 +232,7 @@ class TestConflation < Test::Unit::TestCase
       after_tags: { 'amenity' => 'bicycle_parking' },
       after_geom: '{"type":"Point","coordinates":[0, 2]}'
     )
-    assert_equal([0.0], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
+    assert_equal([0.0, nil, nil], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal({}, conflate_distances)
     assert_equal(
@@ -249,10 +249,10 @@ class TestConflation < Test::Unit::TestCase
       after_tags: { 'amenity' => 'bicycle_parking' },
       after_geom: '{"type":"Point","coordinates":[0, 0.5]}'
     )
-    assert_equal([0.0], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
+    assert_equal([0.0, nil, nil], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal([[before[0], after[0]]], conflate_distances.keys)
-    assert_equal([0.0], T.must(conflate_distances.values[0])[0])
+    assert_equal([0.0, nil, nil], T.must(conflate_distances.values[0])[0])
     assert_equal(0.0, T.must(conflate_distances.values[0])[2])
     assert_equal([[before[0], after[0], after[0]]], Conflation.conflate(before, after, @@demi_distance).collect(&:to_a))
   end
@@ -362,6 +362,79 @@ class TestConflation < Test::Unit::TestCase
     assert_equal(
       [[before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) },
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }
+    )
+  end
+
+  sig { void }
+  def test_conflate_splited_tags
+    before = [
+      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+        'building' => 'house',
+        'landuse' => 'residencial',
+      }),
+    ]
+    after = [
+      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
+      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
+    ]
+
+    conflations = Conflation.conflate(before, after, @@demi_distance)
+    assert_equal(2, conflations.size, conflations)
+    assert_equal(
+      [[before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) },
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
+    )
+  end
+
+  sig { void }
+  def test_conflate_splited_tags_reverse
+    before = [
+      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
+      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
+    ]
+    after = [
+      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+        'building' => 'house',
+        'landuse' => 'residencial',
+      }),
+    ]
+
+    conflations = Conflation.conflate(before, after, @@demi_distance)
+    assert_equal(2, conflations.size, conflations)
+    assert_equal(
+      [[before[0], after[0], after[2]], [before[1], after[1], after[2]]].collect{ |t| t.collect(&:id) },
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
+    )
+  end
+
+  sig { void }
+  def test_conflate_splited_tags_real
+    before = [
+      build_object(id: 1, geom: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {
+        'amenity' => 'townhall',
+        'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',
+      }),
+      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+        'building' => 'yes'
+      }),
+    ]
+    after = [
+      build_object(id: 1, geom: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {}).with(deleted: true),
+      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+        'amenity' => 'townhall',
+        'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',
+        'building' => 'yes'
+      }),
+    ]
+
+    conflations = Conflation.conflate(before, after, @@demi_distance)
+    assert_equal(2, conflations.size, conflations)
+    assert_equal(
+      [[before[0], after[0], after[1]], [before[1], after[1], after[1]]].collect{ |t| t.collect(&:id) },
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
   end
 

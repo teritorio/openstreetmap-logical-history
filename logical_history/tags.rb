@@ -11,6 +11,8 @@ module LogicalHistory
     DistanceMeusure = T.type_alias {
       [
         Float,
+        T.nilable(T::Hash[String, String]),
+        T.nilable(T::Hash[String, String]),
       ]
     }
 
@@ -43,6 +45,24 @@ module LogicalHistory
 
     sig {
       params(
+        key: String,
+        value_a: T.nilable(String),
+        value_b: T.nilable(String),
+      ).returns(T::Boolean)
+    }
+    def self.key_of_same_class(key, value_a, value_b)
+      !value_a.nil? && !value_b.nil? &&
+        MAIN_TAGS_CLASS_OF_VALUES.key?(key) && (
+        MAIN_TAGS_CLASS_OF_VALUES[key].nil? ||
+        (
+          (T.must(MAIN_TAGS_CLASS_OF_VALUES[key]).include?(value_a)) &&
+          (T.must(MAIN_TAGS_CLASS_OF_VALUES[key]).include?(value_b))
+        )
+      )
+    end
+
+    sig {
+      params(
         tags_a: T::Hash[String, String],
         tags_b: T::Hash[String, String],
       ).returns(T.nilable(Float))
@@ -55,15 +75,7 @@ module LogicalHistory
       keys.sum(0.0) { |key|
         if tags_a[key] == tags_b[key]
           0.0
-        elsif (
-          tags_a.key?(key) && tags_b.key?(key) &&
-          MAIN_TAGS_CLASS_OF_VALUES.key?(key) &&
-          MAIN_TAGS_CLASS_OF_VALUES[key].nil? ||
-          (
-            (MAIN_TAGS_CLASS_OF_VALUES[key]&.include?(tags_a[key])) &&
-            (MAIN_TAGS_CLASS_OF_VALUES[key]&.include?(tags_b[key]))
-          )
-        )
+        elsif key_of_same_class(key, tags_a[key], tags_b[key])
           # Same key with values in the same range class
           0.5
         else
@@ -103,13 +115,26 @@ module LogicalHistory
       }
 
       # Main tags
-      d_main = key_val_main_distance(T.must(a)[0] || {}, T.must(b)[0] || {})
+      main_tags_a = T.must(a)[0] || {}
+      main_tags_b = T.must(b)[0] || {}
+      d_main = key_val_main_distance(main_tags_a, main_tags_b)
       return if d_main.nil? || d_main >= 1.0
 
-      # Other tags
-      d = (d_main + key_val_fuzzy_distance(T.must(a)[1] || {}, T.must(b)[1] || {})) / 2
+      # Symmetrical main tags difference
+      remaining_tags_a = main_tags_a.reject{ |k, v| main_tags_b[k] == v || key_of_same_class(k, v, main_tags_b[k]) }.to_h
+      remaining_tags_b = main_tags_b.reject{ |k, v| main_tags_a[k] == v || key_of_same_class(k, v, main_tags_a[k]) }.to_h
 
-      [d]
+      # Other tags
+      other_tags_a = T.must(a)[1] || {}
+      other_tags_b = T.must(b)[1] || {}
+      d = (d_main + key_val_fuzzy_distance(other_tags_a, other_tags_b)) / 2
+
+      remaining_tags_a = remaining_tags_a.merge(other_tags_a.reject{ |k, v| other_tags_b[k] == v }.to_h) if !remaining_tags_a.empty?
+      remaining_tags_b = remaining_tags_b.merge(other_tags_b.reject{ |k, v| other_tags_a[k] == v }.to_h) if !remaining_tags_b.empty?
+
+      # TODO: Some tags are side tags of main tags, and we could move on one side along the main tag.
+
+      [d, remaining_tags_a.presence, remaining_tags_b.presence]
     end
   end
 end

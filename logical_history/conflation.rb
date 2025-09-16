@@ -258,7 +258,7 @@ module LogicalHistory
         T::Enumerable[OSMObject]
       ]])
     }
-    def self.remaining_parts(key_min, befores, afters, dist_geom)
+    def self.remaining_geom_parts(key_min, befores, afters, dist_geom)
       parts = T.let([], T::Array[[
         T::Enumerable[OSMObject],
         T::Enumerable[OSMObject]
@@ -274,6 +274,45 @@ module LogicalHistory
       end
       if !T.unsafe(remaning_after_geom).nil?
         remaning_after = key_min[1].with(geos: remaning_after_geom)
+        parts << [befores, [remaning_after]]
+      end
+      if !remaning_before.nil? && !remaning_after.nil?
+        parts << [
+          [remaning_before],
+          [remaning_after]
+        ]
+      end
+
+      parts
+    end
+
+    sig {
+      params(
+        key_min: [OSMObject, OSMObject],
+        befores: T::Set[OSMObject],
+        afters: T::Set[OSMObject],
+        dist_tags: LogicalHistory::Tags::DistanceMeusure,
+      ).returns(T::Array[[
+        T::Enumerable[OSMObject],
+        T::Enumerable[OSMObject]
+      ]])
+    }
+    def self.remaining_tags_parts(key_min, befores, afters, dist_tags)
+      parts = T.let([], T::Array[[
+        T::Enumerable[OSMObject],
+        T::Enumerable[OSMObject]
+      ]])
+
+      remaning_before_tags = dist_tags[1]
+      remaning_after_tags = dist_tags[2]
+      remaning_before = T.let(nil, T.nilable(OSMObject))
+      remaning_after = T.let(nil, T.nilable(OSMObject))
+      if !T.unsafe(remaning_before_tags).nil?
+        remaning_before = key_min[0].with(tags: remaning_before_tags)
+        parts << [[remaning_before], afters]
+      end
+      if !T.unsafe(remaning_after_tags).nil?
+        remaning_after = key_min[1].with(tags: remaning_after_tags)
         parts << [befores, [remaning_after]]
       end
       if !remaning_before.nil? && !remaning_after.nil?
@@ -319,10 +358,19 @@ module LogicalHistory
         # Add the remaining geom parts to the matrix
         new_befores = T.let(Set.new, T::Set[OSMObject])
         new_afters = T.let(Set.new, T::Set[OSMObject])
-        remaining_parts(key_min, befores, afters, dist[1]).each{ |parts|
-          new_befores = new_befores.merge(parts[0])
-          new_afters = new_afters.merge(parts[1])
-        }
+        if !T.unsafe(dist[1][1]).nil? || !T.unsafe(dist[1][2]).nil?
+          remaining_geom_parts(key_min, befores, afters, dist[1]).each{ |parts|
+            new_befores = new_befores.merge(parts[0])
+            new_afters = new_afters.merge(parts[1])
+          }
+        elsif !dist[0][1].nil? || !dist[0][2].nil?
+          remaining_tags_parts(key_min, befores, afters, dist[0]).each{ |parts|
+            new_befores = new_befores.merge(parts[0])
+            new_afters = new_afters.merge(parts[1])
+          }
+          # else
+          # TODO Handle case with reaming geom AND tags
+        end
 
         distance_matrix_nb_na = conflate_matrix(new_befores, new_afters, demi_distance)
         distance_matrix_nb_a = conflate_matrix(new_befores, afters, demi_distance)
