@@ -25,6 +25,10 @@ class App < Hanami::API
     adapter :LRUHash
   end
 
+  get '/up' do
+    204
+  end
+
   get '/api/0.1/overpass_logical_history' do
     srid = params[:srid] || 2154
     demi_distance = params[:distance] || 200.0 # m
