@@ -54,7 +54,7 @@ module OverspassLogicalHistory
     bbox = bbox.join(',')
 
     overpass_query = <<-QUERY
-    [diff:"#{date_start}","#{date_end}"];
+    [adiff:"#{date_start}","#{date_end}"];
     (
       node#{selector}(#{bbox});
       way#{selector}(#{bbox});
@@ -90,6 +90,7 @@ module OverspassLogicalHistory
       case action['type']
       when 'delete'
         old << action['old']
+        new << action['new'].transform_values!{ |o| o.except!('visible').merge!('deleted' => true) }
       when 'create'
         new << action.except('type')
       when 'modify'
@@ -119,7 +120,7 @@ module OverspassLogicalHistory
     }.flatten(2)
 
     geos_factory = OSMObject.build_geos_factory(local_srid)
-    osm_data.select{ |element| !element['tag'].nil? && %w[node way].include?(element['type']) }.collect{ |element|
+    osm_data.select{ |element| %w[node way].include?(element['type']) }.collect{ |element|
       OSMObject.new(
         objtype: element['type'],
         id: element['id'].to_i,
@@ -129,29 +130,33 @@ module OverspassLogicalHistory
               'type' => 'Point',
               'coordinates' => [element['lon'].to_f, element['lat'].to_f]
             }
-          elsif element['type'] == 'way' && element['nd'][0] == element['nd'][-1]
-            {
-              'type' => 'Polygon',
-              'coordinates' => [element['nd'].map{ |node|
-                [node['lon'].to_f, node['lat'].to_f]
-              }]
-            }
           elsif element['type'] == 'way'
-            {
-              'type' => 'LineString',
-              'coordinates' => element['nd'].map{ |node|
-                [node['lon'].to_f, node['lat'].to_f]
+            if element['nd'].nil?
+              nil
+            elsif element['nd'][0] == element['nd'][-1]
+              {
+                'type' => 'Polygon',
+                'coordinates' => [element['nd'].map{ |node|
+                  [node['lon'].to_f, node['lat'].to_f]
+                }]
               }
-            }
+            else
+              {
+                'type' => 'LineString',
+                'coordinates' => element['nd'].map{ |node|
+                  [node['lon'].to_f, node['lat'].to_f]
+                }
+              }
+            end
           end
         ).to_json,
         geos_factory: geos_factory,
-        deleted: false,
+        deleted: element['deleted'] || false,
         members: nil, ##################### TODO
         version: element['version'].to_i,
         username: element['user'],
         created: element['timestamp'],
-        tags: (element['tag'].is_a?(Array) ? element['tag'] : [element['tag']]).to_h{ |p| [p['k'], p['v']] }
+        tags: element['tag'].nil? ? {} : (element['tag'].is_a?(Array) ? element['tag'] : [element['tag']]).to_h{ |p| [p['k'], p['v']] }
       )
     }
   end

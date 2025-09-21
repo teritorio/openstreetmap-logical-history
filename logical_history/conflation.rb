@@ -509,7 +509,7 @@ module LogicalHistory
     def self.conflate(befores, afters, demi_distance)
       afters_index = afters.index_by{ |a| [a.objtype, a.id] }
       befores = befores.to_set
-      afters = afters.select{ |a| !a.deleted }.to_set
+      afters = afters.to_set
 
       paired_by_distance, befores, afters = conflate_core(befores, afters, afters_index, demi_distance)
 
