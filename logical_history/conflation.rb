@@ -116,7 +116,7 @@ module LogicalHistory
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
       def diff_tags
         (before.tags.keys + after.tags.keys).uniq.select{ |key|
-          before.tags[key] != after.tags[key]
+          !before.tags.key?(key) || !after.tags.key?(key) || before.tags[key] != after.tags[key]
         }.to_h{ |key|
           [key, [['reject', nil, nil]]]
         }
@@ -162,7 +162,7 @@ module LogicalHistory
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
       def diff_tags
         ((before&.tags&.keys || []) + (after&.tags&.keys || [])).uniq.select{ |key|
-          before&.tags&.[](key) == after&.tags&.[](key)
+          !before&.tags&.key?(key) || !after&.tags&.key?(key) || before&.tags&.[](key) == after&.tags&.[](key)
         }.to_h{ |key|
           [key, [['reject', nil, nil]]]
         }
@@ -472,7 +472,10 @@ module LogicalHistory
         else
           # Merge remaining geom with already conflated main part
           p = block.call(paired)
-          union = p.with(geos: T.must(p.geos).union(b.geos))
+          union = p.with(
+            tags: p.tags.merge(b.tags),
+            geos: T.must(p.geos).union(b.geos)
+          )
           paired.send("#{key}=", union)
           false
         end
@@ -507,6 +510,7 @@ module LogicalHistory
       ).returns(ConflationsNilable)
     }
     def self.conflate(befores, afters, demi_distance)
+      befores_index = befores.index_by{ |b| [b.objtype, b.id] }
       afters_index = afters.index_by{ |a| [a.objtype, a.id] }
       befores = befores.to_set
       afters = afters.to_set
@@ -529,7 +533,13 @@ module LogicalHistory
             after.geom_distance = nil if after.geom_distance == 0
           end
         end
-        c
+
+        # Get original full objects (not remaining part)
+        ConflationNilableOnly.new(
+          before: c.before.nil? ? nil : T.must(befores_index[[T.must(c.before).objtype, T.must(c.before).id]]),
+          before_at_now: c.before_at_now,
+          after: c.after.nil? ? nil : T.must(afters_index[[T.must(c.after).objtype, T.must(c.after).id]])
+        )
       }
     end
 
