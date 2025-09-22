@@ -126,24 +126,30 @@ module OverspassLogicalHistory
         id: element['id'].to_i,
         geom: (
           if element['type'] == 'node'
-            {
-              'type' => 'Point',
-              'coordinates' => [element['lon'].to_f, element['lat'].to_f]
-            }
+            if !element['lat'].nil? && !element['lon'].nil?
+              {
+                'type' => 'Point',
+                'coordinates' => [element['lon'].to_f, element['lat'].to_f]
+              }
+            end
           elsif element['type'] == 'way'
             if element['nd'].nil?
               nil
             elsif element['nd'][0] == element['nd'][-1]
               {
                 'type' => 'Polygon',
-                'coordinates' => [element['nd'].map{ |node|
+                'coordinates' => [element['nd'].select{ |node|
+                  !node['lon'].nil? && !node['lat'].nil?
+                }.map{ |node|
                   [node['lon'].to_f, node['lat'].to_f]
                 }]
               }
             else
               {
                 'type' => 'LineString',
-                'coordinates' => element['nd'].map{ |node|
+                'coordinates' => element['nd'].select{ |node|
+                  !node['lon'].nil? && !node['lat'].nil?
+                }.map{ |node|
                   [node['lon'].to_f, node['lat'].to_f]
                 }
               }
