@@ -104,13 +104,9 @@ module LogicalHistory
         # - members
         %i[deleted geom_distance].select{ |attrib|
           before.send(attrib) != after.send(attrib)
-        }.to_h { |attrib|
-          if attrib == :geom_distance
-            ['geom', [['reject', nil, after.geom_distance.nil? ? nil : { dist: after.geom_distance }]]]
-          else
-            [attrib.to_s, [['reject', nil, nil]]]
-          end
-        }
+        }.collect { |attrib|
+          [attrib.to_s, [['reject', nil, attrib == :geom_distance && !after.geom_distance.nil? ? { dist: after.geom_distance } : nil]]]
+        }.compact.to_h
       end
 
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
@@ -149,14 +145,10 @@ module LogicalHistory
         # - lon
         # - members
         %i[deleted geom_distance].select{ |attrib|
-          before&.send(attrib) == after&.send(attrib)
-        }.to_h { |attrib|
-          if attrib == :geom_distance
-            ['geom', [['reject', nil, after&.geom_distance.nil? ? nil : { dist: after&.geom_distance }]]]
-          else
-            [attrib.to_s, [['reject', nil, nil]]]
-          end
-        }
+          before&.send(attrib) != after&.send(attrib)
+        }.collect { |attrib|
+          [attrib.to_s, [['reject', nil, !after.nil? && !after&.geom_distance.nil? ? { dist: after&.geom_distance } : nil]]]
+        }.compact.to_h
       end
 
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
