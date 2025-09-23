@@ -18,7 +18,7 @@ class TestConflationReal < Test::Unit::TestCase
 
   sig { void }
   def test_building
-    # [out:xml][timeout:25][diff:"2024-12-10T00:00:00.00Z","2024-12-15T00:00:00.00Z"];
+    # [out:xml][timeout:25][adiff:"2024-12-10T00:00:00.00Z","2024-12-15T00:00:00.00Z"];
     # (
     #   way(756231553);
     #   way(1342109813);
@@ -26,7 +26,8 @@ class TestConflationReal < Test::Unit::TestCase
     # out meta geom;
     xml = '
     <osm version="0.6" generator="openstreetmap-cgimap 2.1.0 (1060541 spike-06.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
-      <action type="delete"><old>
+    <action type="delete">
+    <old>
       <way id="756231553" visible="true" version="1" changeset="78525508" timestamp="2019-12-17T12:02:03Z" user="Etzharai" uid="3771138">
         <nd ref="7063168425" lat="42.6862569" lon="-1.6527141"/>
         <nd ref="7063168426" lat="42.6862020" lon="-1.6525740"/>
@@ -37,9 +38,13 @@ class TestConflationReal < Test::Unit::TestCase
         <nd ref="7063168425" lat="42.6862569" lon="-1.6527141"/>
         <tag k="building" v="yes"/>
       </way>
-      </old></action>
-      <action type="create">
-      <way id="1342109813" visible="true" version="1" changeset="160208663" timestamp="2024-12-12T13:43:47Z" user="Etzharai" uid="3771138">
+    </old>
+    <new>
+      <way id="756231553" visible="false" version="2" timestamp="2024-12-12T13:43:47Z" changeset="160208663" uid="3771138" user="Etzharai"/>
+    </new>
+    </action>
+    <action type="create">
+      <way id="1342109813" version="1" timestamp="2024-12-12T13:43:47Z" changeset="160208663" uid="3771138" user="Etzharai">
         <nd ref="12416010721" lat="42.6862363" lon="-1.6526962"/>
         <nd ref="12416011073" lat="42.6862154" lon="-1.6526387"/>
         <nd ref="12416010722" lat="42.6861917" lon="-1.6525733"/>
@@ -53,7 +58,8 @@ class TestConflationReal < Test::Unit::TestCase
         <tag k="addr:postcode" v="31398"/>
         <tag k="addr:street" v="Calle Artearraga"/>
         <tag k="building" v="house"/>
-      </way></action>
+      </way>
+      </action>
     </osm>
     '
 
