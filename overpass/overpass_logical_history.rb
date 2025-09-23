@@ -32,7 +32,7 @@ module OverspassLogicalHistory
           # is_change: is_change,
           # group_ids: group_ids
         },
-        geometry: JSON.parse(geom)
+        geometry: JSON.parse(geojson_geometry)
       }
     end
   end
@@ -124,7 +124,7 @@ module OverspassLogicalHistory
       OSMObject.new(
         objtype: element['type'],
         id: element['id'].to_i,
-        geom: (
+        geojson_geometry: (
           if element['type'] == 'node'
             if !element['lat'].nil? && !element['lon'].nil?
               {

@@ -22,7 +22,7 @@ module LogicalHistory
 
     const :objtype, String
     const :id, Integer
-    const :geom, String
+    const :geojson_geometry, String
     prop :geos, T.nilable(RGeo::Feature::Geometry)
     const :geos_factory, T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry))
     prop :geom_distance, T.nilable(T.any(Float, Integer))
@@ -39,7 +39,7 @@ module LogicalHistory
     def geos
       if @geos.nil? && !@has_geos
         @has_geos = true
-        @geos = geos_factory.call(geom)
+        @geos = geos_factory.call(geojson_geometry)
       end
 
       @geos
@@ -47,28 +47,28 @@ module LogicalHistory
 
     sig { overridable.params(other: OSMObject).returns(T::Boolean) }
     def eql?(other)
-      objtype == other.objtype && id == other.id && version == other.version && geom == other.geom
+      objtype == other.objtype && id == other.id && version == other.version && geojson_geometry == other.geojson_geometry
     end
     alias == eql?
 
     sig { overridable.returns(Integer) }
     def hash
-      [objtype, id, version, geom].hash
+      [objtype, id, version, geojson_geometry].hash
     end
 
     sig {
       params(
       local_srid: Integer
     ).returns(
-        T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry))
+        T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry))
       )
     }
     def self.build_geos_factory(local_srid)
       geo_factory = RGeo::Geos.factory(srid: 4326)
       projection = RGeo::Geos.factory(srid: local_srid)
 
-      proc do |geom|
-        decode = RGeo::GeoJSON.decode(geom, geo_factory: geo_factory)
+      proc do |geojson_geometry|
+        decode = RGeo::GeoJSON.decode(geojson_geometry, geo_factory: geo_factory)
         RGeo::Feature.cast(decode, project: true, factory: projection) if !decode.nil?
       rescue RGeo::Error::InvalidGeometry
         nil
@@ -209,7 +209,7 @@ module LogicalHistory
         next if T.unsafe(b.geos).nil?
 
         afters.each{ |a|
-          next if a.geom.nil?
+          next if a.geojson_geometry.nil?
 
           t_dist = LogicalHistory::Tags.tags_distance(b.tags, a.tags)
           next if t_dist.nil?

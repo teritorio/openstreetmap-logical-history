@@ -21,7 +21,7 @@ class TestConflation < Test::Unit::TestCase
       id: Integer,
       version: Integer,
       tags: T::Hash[String, String],
-      geom: String,
+      geojson_geometry: String,
       srid: Integer,
     ).returns(OSMObject)
   }
@@ -29,14 +29,14 @@ class TestConflation < Test::Unit::TestCase
     id: 1,
     version: 1,
     tags: { 'highway' => 'a' },
-    geom: '{"type":"Point","coordinates":[0,0]}',
+    geojson_geometry: '{"type":"Point","coordinates":[0,0]}',
     srid: 4326
   )
     geos_factory = OSMObject.build_geos_factory(srid)
     OSMObject.new(
         objtype: 'n',
         id: id,
-        geom: geom,
+        geojson_geometry: geojson_geometry,
         geos_factory: geos_factory,
         geom_distance: 0,
         deleted: false,
@@ -67,8 +67,8 @@ class TestConflation < Test::Unit::TestCase
     after_geom: '{"type":"Point","coordinates":[0,0]}',
     srid: 4326
   )
-    before = [build_object(id: 1, tags: before_tags, geom: before_geom, srid: srid)]
-    after = [build_object(id: 1, tags: after_tags, geom: after_geom, srid: srid)]
+    before = [build_object(id: 1, tags: before_tags, geojson_geometry: before_geom, srid: srid)]
+    after = [build_object(id: 1, tags: after_tags, geojson_geometry: after_geom, srid: srid)]
     [before, after]
   end
 
@@ -177,13 +177,13 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_deleted
     tags = { 'highway' => 'residential' }
-    geom = '{"type":"Point","coordinates":[0,0]}'
+    geojson_geometry = '{"type":"Point","coordinates":[0,0]}'
     before = [
-      build_object(id: 1, geom: geom, tags: tags),
+      build_object(id: 1, geojson_geometry: geojson_geometry, tags: tags),
     ]
     after = [
-      build_object(id: 1, geom: geom, tags: tags).with(deleted: true),
-      build_object(id: 2, geom: geom, tags: tags),
+      build_object(id: 1, geojson_geometry: geojson_geometry, tags: tags).with(deleted: true),
+      build_object(id: 2, geojson_geometry: geojson_geometry, tags: tags),
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
@@ -193,13 +193,13 @@ class TestConflation < Test::Unit::TestCase
 
   sig { void }
   def test_conflate_semantic_deleted
-    geom = '{"type":"Point","coordinates":[0,0]}'
+    geojson_geometry = '{"type":"Point","coordinates":[0,0]}'
     before = [
-      build_object(id: 1, geom: geom, tags: { 'highway' => 'residential' }),
+      build_object(id: 1, geojson_geometry: geojson_geometry, tags: { 'highway' => 'residential' }),
     ]
     after = [
-      build_object(id: 1, geom: geom, tags: {}),
-      build_object(id: 2, geom: geom, tags: { 'highway' => 'residential' }),
+      build_object(id: 1, geojson_geometry: geojson_geometry, tags: {}),
+      build_object(id: 2, geojson_geometry: geojson_geometry, tags: { 'highway' => 'residential' }),
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
@@ -287,8 +287,8 @@ class TestConflation < Test::Unit::TestCase
       'public_transport' => 'platform',
     }
     before = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: before_tags, srid: srid),
-      build_object(id: 2, geom: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: before_tags, srid: srid),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: before_tags, srid: srid),
+      build_object(id: 2, geojson_geometry: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: before_tags, srid: srid),
     ]
 
     after_tags = {
@@ -302,8 +302,8 @@ class TestConflation < Test::Unit::TestCase
       'shelter' => 'no',
     }
     after = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: after_tags, srid: srid),
-      build_object(id: 2, geom: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: after_tags, srid: srid),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[-1.4865344, 43.5357032]}', tags: after_tags, srid: srid),
+      build_object(id: 2, geojson_geometry: '{"type":"Point","coordinates":[-1.4864637, 43.5359501]}', tags: after_tags, srid: srid),
     ]
 
     conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, demi_distance)
@@ -326,7 +326,7 @@ class TestConflation < Test::Unit::TestCase
       'opening_hours' => 'Mo-Sa 09:30-13:00,14:30-18:00',
     }
     before = [
-      build_object(id: 1, geom: geojson, tags: before_tags, srid: srid),
+      build_object(id: 1, geojson_geometry: geojson, tags: before_tags, srid: srid),
     ]
 
     after_tags = {
@@ -334,7 +334,7 @@ class TestConflation < Test::Unit::TestCase
       'opening_hours' => 'Mo-Sa 09:30-13:00,14:30-18:00; PH 10:00-13:00',
     }
     after = [
-      build_object(id: 1, geom: geojson, tags: after_tags, srid: srid),
+      build_object(id: 1, geojson_geometry: geojson, tags: after_tags, srid: srid),
     ]
 
     assert_equal(
@@ -349,12 +349,12 @@ class TestConflation < Test::Unit::TestCase
       'highway' => 'residential',
     }
     before = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags),
     ]
     after = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags).with(deleted: true),
-      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: tags),
-      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,100],[0,200]]}', tags: tags),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags).with(deleted: true),
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: tags),
+      build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,100],[0,200]]}', tags: tags),
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
@@ -368,15 +368,15 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_splited_tags
     before = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'building' => 'house',
         'landuse' => 'residencial',
       }),
     ]
     after = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
-      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
-      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
+      build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
@@ -390,13 +390,13 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_splited_tags_reverse
     before = [
-      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
-      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
+      build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
     ]
     after = [
-      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
-      build_object(id: 3, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'building' => 'house',
         'landuse' => 'residencial',
       }),
@@ -413,17 +413,17 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_splited_tags_real
     before = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {
         'amenity' => 'townhall',
         'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',
       }),
-      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'building' => 'yes'
       }),
     ]
     after = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {}).with(deleted: true),
-      build_object(id: 2, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {}).with(deleted: true),
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'amenity' => 'townhall',
         'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',
         'building' => 'yes'
@@ -443,14 +443,14 @@ class TestConflation < Test::Unit::TestCase
     before = [
       build_object(
         id: 1,
-        geom: '{"type": "LineString", "coordinates": [[-1.421862006187439, 43.72491455078125], [-1.421954035758972, 43.72502899169922], [-1.422500014305115, 43.72486877441406], [-1.422412037849426, 43.72471237182617], [-1.421862006187439, 43.72491455078125]]}',
+        geojson_geometry: '{"type": "LineString", "coordinates": [[-1.421862006187439, 43.72491455078125], [-1.421954035758972, 43.72502899169922], [-1.422500014305115, 43.72486877441406], [-1.422412037849426, 43.72471237182617], [-1.421862006187439, 43.72491455078125]]}',
         tags: { 'amenity' => 'parking' }
       ),
     ]
     after = [
       build_object(
         id: 1,
-        geom: '{"type": "LineString", "coordinates": [[-1.421862006187439, 43.72491455078125], [-1.421954035758972, 43.72502899169922], [-1.422500014305115, 43.72486877441406], [-1.422412037849426, 43.72471237182617], [-1.422093033790588, 43.724788665771484], [-1.422013998031616, 43.72474670410156], [-1.421862006187439, 43.72491455078125]]}',
+        geojson_geometry: '{"type": "LineString", "coordinates": [[-1.421862006187439, 43.72491455078125], [-1.421954035758972, 43.72502899169922], [-1.422500014305115, 43.72486877441406], [-1.422412037849426, 43.72471237182617], [-1.422093033790588, 43.724788665771484], [-1.422013998031616, 43.72474670410156], [-1.421862006187439, 43.72491455078125]]}',
         tags: { 'fee' => 'no', 'access' => 'yes', 'amenity' => 'parking', 'parking' => 'surface' }
       )
     ]
@@ -469,10 +469,10 @@ class TestConflation < Test::Unit::TestCase
       'highway' => 'residential',
     }
     before = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags),
     ]
     after = [
-      build_object(id: 1, geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: tags),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: tags),
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
@@ -486,10 +486,10 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_merge_deleted_created
     before = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'a' }),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'a' }),
     ]
     after = [
-      build_object(id: 1, geom: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'b' }),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'b' }),
     ]
 
     conflations = Conflation.conflate_with_simplification(before, after, @@demi_distance)
