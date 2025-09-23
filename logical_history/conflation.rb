@@ -154,7 +154,7 @@ module LogicalHistory
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
       def diff_tags
         ((before&.tags&.keys || []) + (after&.tags&.keys || [])).uniq.select{ |key|
-          !before&.tags&.key?(key) || !after&.tags&.key?(key) || before&.tags&.[](key) == after&.tags&.[](key)
+          !before&.tags&.key?(key) || !after&.tags&.key?(key) || before&.tags&.[](key) != after&.tags&.[](key)
         }.to_h{ |key|
           [key, [['reject', nil, nil]]]
         }
