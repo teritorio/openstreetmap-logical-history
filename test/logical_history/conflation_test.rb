@@ -38,6 +38,7 @@ class TestConflation < Test::Unit::TestCase
         id: id,
         geojson_geometry: geojson_geometry,
         geos_factory: geos_factory,
+        geom_score: 0,
         geom_distance: 0,
         deleted: false,
         members: nil,
@@ -141,7 +142,7 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_geom
     before, after = build_objects(before_geom: '{"type":"Point","coordinates":[0,0]}', after_geom: '{"type":"Point","coordinates":[0,1]}')
-    assert_equal(1.0, Geom.geom_distance(
+    assert_equal(1.0, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
       @@demi_distance
@@ -152,7 +153,7 @@ class TestConflation < Test::Unit::TestCase
     )
 
     before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[100,0]]}', after_geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}')
-    assert_equal(0.5, Geom.geom_distance(
+    assert_equal(0.5, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
       @@demi_distance
@@ -163,7 +164,7 @@ class TestConflation < Test::Unit::TestCase
     )
 
     before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', after_geom: '{"type":"LineString","coordinates":[[0,200],[0,300]]}')
-    assert_equal(0.995049504950495, Geom.geom_distance(
+    assert_equal(0.995049504950495, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
       @@demi_distance

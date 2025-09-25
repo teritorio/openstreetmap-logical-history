@@ -25,6 +25,7 @@ module LogicalHistory
     const :geojson_geometry, String
     prop :geos, T.nilable(RGeo::Feature::Geometry)
     const :geos_factory, T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry))
+    prop :geom_score, T.nilable(T.any(Float, Integer))
     prop :geom_distance, T.nilable(T.any(Float, Integer))
     const :deleted, T::Boolean
     const :members, T.nilable(T::Array[Integer])
@@ -102,10 +103,10 @@ module LogicalHistory
         # - lat
         # - lon
         # - members
-        %i[deleted geom_distance].select{ |attrib|
+        %i[deleted geom_score].select{ |attrib|
           before.send(attrib) != after.send(attrib)
         }.collect { |attrib|
-          [attrib.to_s, [['reject', nil, attrib == :geom_distance && !after.geom_distance.nil? ? { dist: after.geom_distance } : nil]]]
+          [attrib.to_s, [['reject', nil, attrib == :geom_score && !after.geom_score.nil? ? { score: after.geom_score, distance: after.geom_distance } : nil]]]
         }.compact.to_h
       end
 
@@ -144,10 +145,10 @@ module LogicalHistory
         # - lat
         # - lon
         # - members
-        %i[deleted geom_distance].select{ |attrib|
+        %i[deleted geom_score].select{ |attrib|
           before&.send(attrib) != after&.send(attrib)
         }.collect { |attrib|
-          [attrib.to_s, [['reject', nil, !after.nil? && !after&.geom_distance.nil? ? { dist: after&.geom_distance } : nil]]]
+          [attrib.to_s, [['reject', nil, !after.nil? && !after&.geom_score.nil? ? { score: after&.geom_score, distance: after&.geom_distance } : nil]]]
         }.compact.to_h
       end
 
@@ -223,7 +224,7 @@ module LogicalHistory
               # Geom distance does not matter on 1x1 matrix, fast return
               [0.0, nil, nil]
             else
-              LogicalHistory::Geom.geom_distance(T.must(b.geos), T.must(a.geos), demi_distance)
+              LogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
             end
           )
           next if g_dist.nil?

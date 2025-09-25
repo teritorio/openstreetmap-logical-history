@@ -11,10 +11,10 @@ module LogicalHistory
 
     DistanceMeusure = T.type_alias {
       [
-          Float, # Meusure of difference
-          T.nilable(RGeo::Feature::Geometry),
-          T.nilable(RGeo::Feature::Geometry)
-        ]
+        Float, # Meusure of difference
+        T.nilable(RGeo::Feature::Geometry),
+        T.nilable(RGeo::Feature::Geometry)
+      ]
     }
 
     sig {
@@ -69,7 +69,7 @@ module LogicalHistory
         demi_distance: Float,
       ).returns(T.nilable(DistanceMeusure))
     }
-    def self.geom_distance(r_geom_a, r_geom_b, demi_distance)
+    def self.geom_score(r_geom_a, r_geom_b, demi_distance)
       return [0.0, nil, nil] if r_geom_a.equals?(r_geom_b)
 
       if r_geom_a.dimension == 0 && r_geom_b.dimension == 0

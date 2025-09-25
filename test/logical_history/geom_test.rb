@@ -11,7 +11,7 @@ class TestGeom < Test::Unit::TestCase
   extend T::Sig
 
   sig { void }
-  def test_geom_distance
+  def test_geom_score
     srid = 2154
     demi_distance = 200.0 # m
 
@@ -28,7 +28,7 @@ class TestGeom < Test::Unit::TestCase
       project: true,
       factory: projection,
     )
-    d = Geom.geom_distance(before, after, demi_distance)
+    d = Geom.geom_score(before, after, demi_distance)
 
     assert(T.must(d&.first) < 0.5)
     assert(T.must(d&.first) > 0.0)
