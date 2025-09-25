@@ -38,8 +38,6 @@ class TestConflation < Test::Unit::TestCase
         id: id,
         geojson_geometry: geojson_geometry,
         geos_factory: geos_factory,
-        geom_score: 0,
-        geom_distance: 0,
         deleted: false,
         members: nil,
         version: version,

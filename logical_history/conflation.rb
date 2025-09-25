@@ -25,8 +25,6 @@ module LogicalHistory
     const :geojson_geometry, String
     prop :geos, T.nilable(RGeo::Feature::Geometry)
     const :geos_factory, T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry))
-    prop :geom_score, T.nilable(T.any(Float, Integer))
-    prop :geom_distance, T.nilable(T.any(Float, Integer))
     const :deleted, T::Boolean
     const :members, T.nilable(T::Array[Integer])
     const :version, Integer
@@ -80,10 +78,17 @@ module LogicalHistory
   module Conflation
     extend T::Sig
 
+    class ConflationReason < T::InexactStruct
+      prop :geom, T.nilable(T::Hash[Symbol, T.untyped])
+      prop :tags, T.nilable(T::Hash[Symbol, T.untyped])
+      prop :conflate, String
+    end
+
     class Conflation < T::InexactStruct
       prop :before, OSMObject
       prop :before_at_now, T.nilable(OSMObject)
       prop :after, OSMObject
+      prop :reason, ConflationReason
 
       extend T::Sig
 
@@ -103,10 +108,10 @@ module LogicalHistory
         # - lat
         # - lon
         # - members
-        %i[deleted geom_score].select{ |attrib|
+        %i[deleted].select{ |attrib|
           before.send(attrib) != after.send(attrib)
         }.collect { |attrib|
-          [attrib.to_s, [['reject', nil, attrib == :geom_score && !after.geom_score.nil? ? { score: after.geom_score, distance: after.geom_distance } : nil]]]
+          [attrib.to_s, [['reject', nil, nil]]]
         }.compact.to_h
       end
 
@@ -126,6 +131,7 @@ module LogicalHistory
       prop :before, T.nilable(OSMObject)
       prop :before_at_now, T.nilable(OSMObject)
       prop :after, T.nilable(OSMObject)
+      prop :reason, ConflationReason
 
       extend T::Sig
 
@@ -145,10 +151,10 @@ module LogicalHistory
         # - lat
         # - lon
         # - members
-        %i[deleted geom_score].select{ |attrib|
+        %i[deleted].select{ |attrib|
           before&.send(attrib) != after&.send(attrib)
         }.collect { |attrib|
-          [attrib.to_s, [['reject', nil, !after.nil? && !after&.geom_score.nil? ? { score: after&.geom_score, distance: after&.geom_distance } : nil]]]
+          [attrib.to_s, [['reject', nil, nil]]]
         }.compact.to_h
       end
 
@@ -339,7 +345,12 @@ module LogicalHistory
         match = Conflation.new(
           before: key_min[0],
           before_at_now: afters_index[[key_min[0].objtype, key_min[0].id]],
-          after: key_min[1]
+          after: key_min[1],
+          reason: ConflationReason.new(
+            tags: { score: dist[0][0] }.compact,
+            geom: { score: dist[1][0], reason: dist[1][3] }.compact,
+            conflate: 'better score match'
+          )
         )
         paired << match
 
@@ -400,6 +411,7 @@ module LogicalHistory
         T.must(group.reduce{ |sum, conflate|
           sum.before = sum.before.with(geos: T.must(sum.before.geos).union(conflate.before.geos))
           sum.after = sum.after.with(geos: T.must(sum.after.geos).union(conflate.after.geos))
+          sum.reason.conflate += ' (+unicity)'
           sum
         })
       }
@@ -437,7 +449,9 @@ module LogicalHistory
         merged << deleted[key]
         merged << created[key]
         T.must(deleted[key]).after = T.must(created[key]&.after)
-        T.must(deleted[key])
+        c = T.must(deleted[key])
+        c.reason.conflate += ' (+deleted/created merge)'
+        c
       }
 
       paired = paired.select{ |p| !merged.include?(p) }
@@ -515,23 +529,15 @@ module LogicalHistory
 
       (
         paired_by_distance +
-        befores.collect{ |b| ConflationNilableOnly.new(before: b, before_at_now: afters_index[[b.objtype, b.id]]) } +
-        afters.collect{ |a| ConflationNilableOnly.new(after: a) }
+        befores.collect{ |b| ConflationNilableOnly.new(before: b, before_at_now: afters_index[[b.objtype, b.id]], reason: ConflationReason.new(conflate: 'same osm object')) } +
+        afters.collect{ |a| ConflationNilableOnly.new(after: a, reason: ConflationReason.new(conflate: 'remeaning only after object')) }
       ).collect{ |c|
-        if !c.before.nil? && !c.after.nil?
-          after = T.must(c.after)
-          if after.geom_distance.nil?
-            before = T.must(c.before)
-            after.geom_distance = before.geos&.distance(after.geos)
-            after.geom_distance = nil if after.geom_distance == 0
-          end
-        end
-
         # Get original full objects (not remaining part)
         ConflationNilableOnly.new(
           before: c.before.nil? ? nil : T.must(befores_index[[T.must(c.before).objtype, T.must(c.before).id]]),
           before_at_now: c.before_at_now,
-          after: c.after.nil? ? nil : T.must(afters_index[[T.must(c.after).objtype, T.must(c.after).id]])
+          after: c.after.nil? ? nil : T.must(afters_index[[T.must(c.after).objtype, T.must(c.after).id]]),
+          reason: c.reason,
         )
       }
     end
@@ -545,7 +551,17 @@ module LogicalHistory
     }
     def self.conflate_with_simplification(befores, afters, demi_distance)
       paired = conflate(befores, afters, demi_distance)
-      conflate_merge_deleted_created(paired)
+      conflate_merge_deleted_created(paired).collect{ |c|
+        if !c.before.nil? && !c.after.nil? && !T.unsafe(c.before&.geos).nil? && !T.unsafe(c.after&.geos).nil?
+          after = T.must(c.after)
+          before = T.must(c.before)
+          geom_distance = T.must(before.geos).distance(after.geos)
+          if geom_distance > 0
+            c.reason.geom = (c.reason.geom || {}).merge({ distance: geom_distance })
+          end
+        end
+        c
+      }
     end
 
     sig {

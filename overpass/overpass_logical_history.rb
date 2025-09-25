@@ -215,6 +215,7 @@ module OverspassLogicalHistory
           after: id(c.after, false),
           diff_attribs: c.diff_attribs.presence,
           diff_tags: c.diff_tags.presence,
+          reason: c.reason,
         }.compact
       }
       os = conf.collect { |l|
