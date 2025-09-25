@@ -347,7 +347,7 @@ module LogicalHistory
           before_at_now: afters_index[[key_min[0].objtype, key_min[0].id]],
           after: key_min[1],
           reason: ConflationReason.new(
-            tags: { score: dist[0][0] }.compact,
+            tags: { score: dist[0][0], reason: dist[0][3] }.compact,
             geom: { score: dist[1][0], reason: dist[1][3] }.compact,
             conflate: 'better score match'
           )

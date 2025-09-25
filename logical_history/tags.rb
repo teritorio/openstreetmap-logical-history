@@ -13,6 +13,7 @@ module LogicalHistory
         Float,
         T.nilable(T::Hash[String, String]),
         T.nilable(T::Hash[String, String]),
+        String, # Reason
       ]
     }
 
@@ -134,7 +135,8 @@ module LogicalHistory
 
       # TODO: Some tags are side tags of main tags, and we could move on one side along the main tag.
 
-      [d, remaining_tags_a.presence, remaining_tags_b.presence]
+      reason = (main_tags_a.keys & main_tags_b.keys).uniq.sort.join(', ')
+      [d, remaining_tags_a.presence, remaining_tags_b.presence, "matched main keys: #{reason}"]
     end
   end
 end
