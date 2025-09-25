@@ -222,7 +222,7 @@ module LogicalHistory
               # Same refs or geom
               # or
               # Geom distance does not matter on 1x1 matrix, fast return
-              [0.0, nil, nil]
+              [0.0, nil, nil, 'same refs, same geom or 1x1 matrix']
             else
               LogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
             end
