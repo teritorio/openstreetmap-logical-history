@@ -551,7 +551,9 @@ module LogicalHistory
     }
     def self.conflate_with_simplification(befores, afters, demi_distance)
       paired = conflate(befores, afters, demi_distance)
-      conflate_merge_deleted_created(paired).collect{ |c|
+      paired = conflate_merge_deleted_created(paired)
+
+      paired.collect{ |c|
         if !c.before.nil? && !c.after.nil? && !T.unsafe(c.before&.geos).nil? && !T.unsafe(c.after&.geos).nil?
           after = T.must(c.after)
           before = T.must(c.before)
