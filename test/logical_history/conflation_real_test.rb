@@ -69,6 +69,6 @@ class TestConflationReal < Test::Unit::TestCase
 
     conf = Conflation.conflate(data_start, data_end, @@demi_distance)
 
-    assert_equal 1, conf.size, conf.inspect
+    assert_equal 2, conf.size, conf.inspect
   end
 end

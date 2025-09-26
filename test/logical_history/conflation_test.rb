@@ -186,8 +186,11 @@ class TestConflation < Test::Unit::TestCase
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
-    assert_equal(1, conflations.size, conflations)
-    assert_equal([[before[0], after[0], after[1]]], conflations.collect(&:to_a))
+    assert_equal(2, conflations.size, conflations)
+    assert_equal(
+      [[before[0], after[0], after[0]], [before[0], after[0], after[1]]].collect{ |t| t.collect(&:id) }.sort,
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
+    )
   end
 
   sig { void }
@@ -357,10 +360,10 @@ class TestConflation < Test::Unit::TestCase
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
-    assert_equal(2, conflations.size, conflations)
+    assert_equal(3, conflations.size, conflations)
     assert_equal(
-      [[before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) },
-      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }
+      [[before[0], after[0], after[0]], [before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) }.sort,
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
   end
 
@@ -379,9 +382,9 @@ class TestConflation < Test::Unit::TestCase
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
-    assert_equal(2, conflations.size, conflations)
+    assert_equal(3, conflations.size, conflations)
     assert_equal(
-      [[before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) },
+      [[before[0], after[0], after[0]], [before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) },
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
   end
@@ -402,9 +405,9 @@ class TestConflation < Test::Unit::TestCase
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
-    assert_equal(2, conflations.size, conflations)
+    assert_equal(4, conflations.size, conflations)
     assert_equal(
-      [[before[0], after[0], after[2]], [before[1], after[1], after[2]]].collect{ |t| t.collect(&:id) },
+      [[before[0], after[0], after[0]], [before[1], after[1], after[1]], [before[0], after[0], after[2]], [before[1], after[1], after[2]]].collect{ |t| t.collect(&:id) }.sort,
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
   end
@@ -430,9 +433,9 @@ class TestConflation < Test::Unit::TestCase
     ]
 
     conflations = Conflation.conflate(before, after, @@demi_distance)
-    assert_equal(2, conflations.size, conflations)
+    assert_equal(3, conflations.size, conflations)
     assert_equal(
-      [[before[0], after[0], after[1]], [before[1], after[1], after[1]]].collect{ |t| t.collect(&:id) },
+      [[before[0], after[0], after[0]], [before[0], after[0], after[1]], [before[1], after[1], after[1]]].collect{ |t| t.collect(&:id) },
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
   end

@@ -527,6 +527,18 @@ module LogicalHistory
       paired_by_distance, befores, afters = conflate_uniq(paired_by_distance, befores, afters)
       paired_by_distance, befores, afters = conflate_merge_remaning_parts(paired_by_distance, befores, afters)
 
+      # Link deleted object to original
+      paired_deleted_ids = []
+      paired_deleted = afters_index.values.select(&:deleted).collect{ |a|
+        b = befores_index[[a.objtype, a.id]]
+        if !b.nil?
+          paired_deleted_ids << [b.objtype, b.id]
+          ConflationNilableOnly.new(before: b, before_at_now: a, after: a, reason: ConflationReason.new(conflate: 'match delete with original object'))
+        end
+      }.compact
+      befores = befores.select{ |b| !paired_deleted_ids.include?([b.objtype, b.id]) }
+      paired_by_distance += paired_deleted
+
       (
         paired_by_distance +
         befores.collect{ |b| ConflationNilableOnly.new(before: b, before_at_now: afters_index[[b.objtype, b.id]], reason: ConflationReason.new(conflate: 'same osm object')) } +
