@@ -203,6 +203,12 @@ module OverspassLogicalHistory
     data_start = OverspassLogicalHistory.overpass_to_geojson(data_start, srid)
     data_end = OverspassLogicalHistory.overpass_to_geojson(data_end, srid)
 
+    # Remove objects without tags, unless they exist in the other side
+    data_start_with_tags_ids = Set.new(data_start.select{ |e| !e.tags.empty? }.collect{ |e| [e.objtype, e.id] })
+    data_end_with_tags_ids = Set.new(data_end.select{ |e| !e.tags.empty? }.collect{ |e| [e.objtype, e.id] })
+    data_start = data_start.select{ |e| !e.tags.empty? || data_end_with_tags_ids.include?([e.objtype, e.id]) }
+    data_end = data_end.select{ |e| !e.tags.empty? || data_start_with_tags_ids.include?([e.objtype, e.id]) }
+
     conf_group = Conflation.conflate_cluster(data_start, data_end, demi_distance)
 
     objects = data_start.index_by{ |e| id(e, true) }.merge(data_end.index_by{ |e| id(e, false) })
