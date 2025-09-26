@@ -488,7 +488,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'a' }),
     ]
     after = [
-      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,0]}', tags: { 'amenity' => 'b' }),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,0]}', tags: { 'building' => 'b' }),
     ]
 
     conflations = Conflation.conflate_with_simplification(before, after, @@demi_distance)
