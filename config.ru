@@ -6,6 +6,7 @@ require 'hanami/api'
 require 'moneta'
 require 'json'
 require_relative 'osm_api/overpass'
+require_relative 'osm_api/ohsome'
 
 if ENV['SENTRY_DSN'].present?
   puts ENV['SENTRY_DSN'].inspect
@@ -62,10 +63,10 @@ class App < Hanami::API
     cache_key = [bbox, selector, date_start, date_end].join('/')
     body = cache.load(cache_key)
     if body.nil?
-      objects_links_groups = OverspassLogicalHistory.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+      objects_links_groups = Ohsome.struct(bbox, selector, date_start, date_end, srid, demi_distance)
 
       Moneta.new(:File, dir: 'moneta')
-      body = OverspassLogicalHistory.to_geojson(objects_links_groups, bbox).to_json
+      body = Ohsome.to_geojson(objects_links_groups, bbox).to_json
 
       cache.store(cache_key, body, expires_in: 3600) # 1 hour
     end
