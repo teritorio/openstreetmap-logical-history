@@ -5,7 +5,7 @@ require 'sorbet-runtime'
 require 'test/unit'
 require 'json'
 require 'active_support/all'
-require './overpass/overpass_logical_history'
+require './osm_api/overpass'
 
 Conflation = LogicalHistory::Conflation
 OSMObject = LogicalHistory::OSMObject
@@ -63,9 +63,9 @@ class TestConflationReal < Test::Unit::TestCase
     </osm>
     '
 
-    data_start, data_end = OverspassLogicalHistory.parse_xml(xml)
-    data_start = OverspassLogicalHistory.overpass_to_geojson(data_start, @@srid)
-    data_end = OverspassLogicalHistory.overpass_to_geojson(data_end, @@srid)
+    data_start, data_end = Overspass.parse_xml(xml)
+    data_start = Overspass.overpass_to_geojson(data_start, @@srid)
+    data_end = Overspass.overpass_to_geojson(data_end, @@srid)
 
     conf = Conflation.conflate(data_start, data_end, @@demi_distance)
 

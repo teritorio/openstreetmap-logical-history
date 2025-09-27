@@ -28,7 +28,7 @@ module LogicalHistory
     const :deleted, T::Boolean
     const :members, T.nilable(T::Array[Integer])
     const :version, Integer
-    const :username, String
+    const :username, T.nilable(String)
     const :created, String
     const :tags, T::Hash[String, String]
 
