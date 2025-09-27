@@ -2,3 +2,5 @@ services:
   script:
     volumes:
       - .:/srv/app
+    healthcheck:
+      disable: true
