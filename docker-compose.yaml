@@ -5,6 +5,7 @@ services:
     ports:
       - 9292:9292
     environment:
+      - REMOTE_API=${REMOTE_API:-}
       - SENTRY_DSN=${SENTRY_DSN:-}
     command: bundle exec rackup --host 0.0.0.0
     restart: unless-stopped

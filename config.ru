@@ -22,6 +22,8 @@ end
 class App < Hanami::API
   use Sentry::Rack::CaptureExceptions
 
+  remote_api = ENV['REMOTE_API'] == 'overpass' ? Overspass : Ohsome
+
   cache = Moneta.build do
     adapter :LRUHash
   end
@@ -63,10 +65,10 @@ class App < Hanami::API
     cache_key = [bbox, selector, date_start, date_end].join('/')
     body = cache.load(cache_key)
     if body.nil?
-      objects_links_groups = Ohsome.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+      objects_links_groups = remote_api.struct(bbox, selector, date_start, date_end, srid, demi_distance)
 
       Moneta.new(:File, dir: 'moneta')
-      body = Ohsome.to_geojson(objects_links_groups, bbox).to_json
+      body = remote_api.to_geojson(objects_links_groups, bbox).to_json
 
       cache.store(cache_key, body, expires_in: 3600) # 1 hour
     end
