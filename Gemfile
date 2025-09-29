@@ -37,3 +37,5 @@ group :development do
   # gem 'racc'
   # gem 'rbi'
 end
+
+gem 'async', '~> 2.33'

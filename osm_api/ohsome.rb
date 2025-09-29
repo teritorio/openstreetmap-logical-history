@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
+require 'async'
 require 'sorbet-runtime'
 require 'net/http'
 require 'uri'
@@ -59,11 +60,20 @@ class Ohsome < OSMSource
   def self.fetch_osm_at_date(bbox, selector, date_start, date_end)
     check_params!(bbox, selector, date_start, date_end)
 
-    start = fetch('elements', bbox, selector, [date_start])
-    start = JSON.parse(start)['features']
-    changes = fetch('contributions/latest', bbox, selector, [date_start, date_end])
-    changes = JSON.parse(changes)['features']
-    changes_ids = changes.to_set{ |f| f['properties']['@osmId'] }
+    start, (changes, changes_ids) = Sync { |task|
+      [
+        task.async {
+          start = fetch('elements', bbox, selector, [date_start])
+          JSON.parse(start)['features']
+        },
+        task.async {
+          changes = fetch('contributions/latest', bbox, selector, [date_start, date_end])
+          changes = JSON.parse(changes)['features']
+          changes_ids = changes.to_set{ |f| f['properties']['@osmId'] }
+          [changes, changes_ids]
+        }
+      ]
+    }.map(&:wait)
 
     start = start.select{ |f| changes_ids.include?(f['properties']['@osmId']) }
     [start, changes]
