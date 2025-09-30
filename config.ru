@@ -82,6 +82,8 @@ class App < Hanami::API
       body
     ]
   rescue RuntimeError => e
+    puts e.message
+    puts e.backtrace
     [
       400,
       { 'Access-Control-Allow-Origin' => '*' },
