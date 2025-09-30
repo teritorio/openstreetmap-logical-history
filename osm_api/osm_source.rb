@@ -165,7 +165,7 @@ class OSMSource
       geom_clip_start = start_geos.intersection(clip_polygon)
       geom_clip_end = end_geos.intersection(clip_polygon)
 
-      next(true) if geom_clip_start.equals?(geom_clip_end)
+      next(true) if !geom_clip_start.equals?(geom_clip_end)
 
       # No diff found, exclude this object
       data_start_index.delete([e.objtype, e.id])
