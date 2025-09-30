@@ -28,12 +28,33 @@ class App < Hanami::API
     adapter :LRUHash
   end
 
+  def self.best_utm_zone(longitude, latitude)
+    zone = (
+      if latitude >= 56 && latitude < 64 && longitude >= 3 && longitude < 12
+        # Special zone for Norway
+        32
+      elsif latitude >= 72 && latitude < 84
+        # Special zones for Svalbard
+        case longitude
+        when 0...9 then 31
+        when 9...21 then 33
+        when 21...33 then 35
+        when 33...42 then 37
+        else zone
+        end
+      else
+        ((longitude + 180) / 6).floor + 1
+      end
+    )
+
+    latitude >= 0 ? 32_600 + zone : 32_700 + zone
+  end
+
   get '/up' do
     204
   end
 
   get '/api/0.1/overpass_logical_history' do
-    srid = params[:srid] || 2154
     demi_distance = params[:distance] || 200.0 # m
 
     if (!params.key?(:bbox) || params[:bbox].empty?) && (!params.key?(:date_start).nil? || params[:date_start].empty?) && (!params.key?(:date_end).nil? || params[:date_end].empty?)
@@ -65,6 +86,9 @@ class App < Hanami::API
     cache_key = [bbox, selector, date_start, date_end].join('/')
     body = cache.load(cache_key)
     if body.nil?
+      lon = (bbox[0] + bbox[2]) / 2.0
+      lat = (bbox[1] + bbox[3]) / 2.0
+      srid = App.best_utm_zone(lon, lat)
       objects_links_groups = remote_api.struct(bbox, selector, date_start, date_end, srid, demi_distance)
 
       Moneta.new(:File, dir: 'moneta')
