@@ -124,6 +124,58 @@ class OSMSource
 
   sig {
     params(
+      geos_factory: T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry)),
+      bbox: [Float, Float, Float, Float],
+    ).returns(RGeo::Feature::Polygon)
+  }
+  def self.build_geos_bbox(geos_factory, bbox)
+    T.cast(geos_factory.call({ type: 'Polygon', coordinates: [[
+      [bbox[0], bbox[1]],
+      [bbox[2], bbox[1]],
+      [bbox[2], bbox[3]],
+      [bbox[0], bbox[3]],
+      [bbox[0], bbox[1]]
+    ]] }.to_json), RGeo::Feature::Polygon)
+  end
+
+  sig {
+    params(
+      data_start: T::Array[LogicalHistory::OSMObject],
+      data_end: T::Array[LogicalHistory::OSMObject],
+      clip_polygon: T.nilable(RGeo::Feature::Polygon),
+    ).returns([T::Array[LogicalHistory::OSMObject], T::Array[LogicalHistory::OSMObject]])
+  }
+  def self.filter_clip(data_start, data_end, clip_polygon)
+    data_start_index = data_start.index_by{ |e| [e.objtype, e.id] }
+    data_end = data_end.select{ |e|
+      start = data_start_index[[e.objtype, e.id]]
+
+      next(true) if start.nil?
+
+      next(true) if start.tags != e.tags
+
+      next(true) if start.deleted != e.deleted
+
+      start_geos = T.unsafe(start.geos)
+      end_geos = T.unsafe(e.geos)
+      next(true) if start_geos.nil? || end_geos.nil?
+
+      geom_clip_start = start_geos.intersection(clip_polygon)
+      geom_clip_end = end_geos.intersection(clip_polygon)
+
+      next(true) if geom_clip_start.equals?(geom_clip_end)
+
+      # No diff found, exclude this object
+      data_start_index.delete([e.objtype, e.id])
+      false
+    }
+
+    data_start = data_start_index.values
+    [data_start, data_end]
+  end
+
+  sig {
+    params(
       data_start: T::Array[LogicalHistory::OSMObject],
       data_end: T::Array[LogicalHistory::OSMObject],
       demi_distance: Float,

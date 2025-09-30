@@ -82,13 +82,12 @@ class Ohsome < OSMSource
   sig {
     params(
       osm_data: T::Array[T::Hash[String, T.untyped]],
-      local_srid: Integer,
+      geos_factory: T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry)),
     ).returns(
       T::Array[OSMObject]
     )
   }
-  def self.to_osmobject(osm_data, local_srid)
-    geos_factory = OSMObject.build_geos_factory(local_srid)
+  def self.to_osmobject(osm_data, geos_factory)
     osm_data.collect{ |f|
       OSMObject.new(
         objtype: f['properties']['@osmType'],
@@ -121,8 +120,13 @@ class Ohsome < OSMSource
   def self.struct(bbox, selector, date_start, date_end, srid, demi_distance)
     data_start, data_end = fetch_osm_at_date(bbox, selector, date_start, date_end)
 
-    data_start = to_osmobject(data_start, srid)
-    data_end = to_osmobject(data_end, srid)
+    geos_factory = OSMObject.build_geos_factory(srid)
+
+    data_start = to_osmobject(data_start, geos_factory)
+    data_end = to_osmobject(data_end, geos_factory)
+
+    geos_bbox = build_geos_bbox(geos_factory, bbox)
+    data_start, data_end = filter_clip(data_start, data_end, geos_bbox)
 
     cluster(data_start, data_end, demi_distance)
   end

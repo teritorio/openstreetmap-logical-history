@@ -81,12 +81,12 @@ class Overspass < OSMSource
   sig {
     params(
       osm_data: T::Array[T::Hash[String, T.untyped]],
-      local_srid: Integer,
+      geos_factory: T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry)),
     ).returns(
       T::Array[OSMObject]
     )
   }
-  def self.overpass_to_geojson(osm_data, local_srid)
+  def self.overpass_to_geojson(osm_data, geos_factory)
     osm_data = osm_data.collect{ |g|
       g.collect{ |type, element|
         element['type'] = type
@@ -94,7 +94,6 @@ class Overspass < OSMSource
       }
     }.flatten(2)
 
-    geos_factory = OSMObject.build_geos_factory(local_srid)
     osm_data.collect{ |element|
       OSMObject.new(
         objtype: element['type'],
@@ -160,8 +159,14 @@ class Overspass < OSMSource
     raise 'Empty response from Overpass API' if xml.nil? || xml.empty?
 
     data_start, data_end = parse_xml(xml)
-    data_start = overpass_to_geojson(data_start, srid)
-    data_end = overpass_to_geojson(data_end, srid)
+
+    geos_factory = OSMObject.build_geos_factory(srid)
+
+    data_start = overpass_to_geojson(data_start, geos_factory)
+    data_end = overpass_to_geojson(data_end, geos_factory)
+
+    geos_bbox = build_geos_bbox(geos_factory, bbox)
+    data_start, data_end = filter_clip(data_start, data_end, geos_bbox)
 
     cluster(data_start, data_end, demi_distance)
   end
