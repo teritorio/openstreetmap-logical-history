@@ -34,6 +34,7 @@ class TestTags < Test::Unit::TestCase
 
   sig { void }
   def test_tags_distance
+    assert_equal(nil, Tags.tags_distance({ 'a' => 'a' }, { 'a' => 'a' }))
     assert_equal([0.0, nil, nil, 'matched tags: highway=a'], Tags.tags_distance({ 'highway' => 'a' }, { 'highway' => 'a' }))
     assert_equal([0.25, nil, nil, 'matched tags: highway=motorway/trunk'], Tags.tags_distance({ 'highway' => 'motorway' }, { 'highway' => 'trunk' }))
     assert_equal([0.0, nil, nil, 'matched tags: highway=a'], Tags.tags_distance({ 'highway' => 'a', 'foo' => 'a' }, { 'highway' => 'a', 'foo' => 'a' }))

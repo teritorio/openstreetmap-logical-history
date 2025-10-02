@@ -73,13 +73,13 @@ class TestConflation < Test::Unit::TestCase
 
   sig { void }
   def test_conflate_refs
-    before, after = build_objects(before_tags: { 'ref' => 'a' }, after_tags: { 'ref' => 'a' })
+    before, after = build_objects(before_tags: { 'highway' => 'a', 'ref' => 'a' }, after_tags: { 'highway' => 'a', 'ref' => 'a' })
     assert_equal(
       [[before[0], after[0], after[0]]],
       Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)
     )
 
-    before, after = build_objects(before_tags: { 'ref' => 'a', 'foo' => 'a' }, after_tags: { 'ref' => 'a', 'foo' => 'b' })
+    before, after = build_objects(before_tags: { 'highway' => 'a', 'ref' => 'a', 'foo' => 'a' }, after_tags: { 'highway' => 'a', 'ref' => 'a', 'foo' => 'b' })
     assert_equal(
       [[before[0], after[0], after[0]]],
       Conflation.conflate(before, after, @@demi_distance).collect(&:to_a)

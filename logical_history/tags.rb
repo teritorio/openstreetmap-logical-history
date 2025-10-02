@@ -105,6 +105,12 @@ module LogicalHistory
       }.sum.to_f + (all_keys_size - commons_keys.size)) / all_keys_size
     end
 
+    sig { params(tags: T::Hash[String, String]).returns([T::Hash[String, String], T::Hash[String, String]]) }
+    def self.main_second_tags(tags)
+      p = tags.partition{ |k, _v| MAIN_TAGS.include?(k) }.collect(&:to_h)
+      [p[0] || {}, p[1] || {}]
+    end
+
     sig {
       params(
         tags_a: T::Hash[String, String],
@@ -112,13 +118,10 @@ module LogicalHistory
       ).returns(T.nilable(DistanceMeusure))
     }
     def self.tags_distance(tags_a, tags_b)
-      a, b = [tags_a, tags_b].collect{ |tags|
-        tags.partition{ |k, _v| MAIN_TAGS.include?(k) }.select(&:any?).collect(&:to_h)
-      }
+      main_tags_a, other_tags_a = main_second_tags(tags_a)
+      main_tags_b, other_tags_b = main_second_tags(tags_b)
 
       # Main tags
-      main_tags_a = T.must(a)[0] || {}
-      main_tags_b = T.must(b)[0] || {}
       d_main, reason_main = key_val_main_distance(main_tags_a, main_tags_b)
       return if d_main.nil? || d_main >= 1.0
 
@@ -127,8 +130,6 @@ module LogicalHistory
       remaining_tags_b = main_tags_b.reject{ |k, v| main_tags_a[k] == v || key_of_same_class(k, v, main_tags_a[k]) }.to_h
 
       # Other tags
-      other_tags_a = T.must(a)[1] || {}
-      other_tags_b = T.must(b)[1] || {}
       d = (d_main + key_val_fuzzy_distance(other_tags_a, other_tags_b)) / 2
 
       remaining_tags_a = remaining_tags_a.merge(other_tags_a.reject{ |k, v| other_tags_b[k] == v }.to_h) if !remaining_tags_a.empty?
