@@ -28,7 +28,7 @@ class Overspass < OSMSource
     bbox = bbox.join(',')
 
     overpass_query = <<-QUERY
-    [adiff:"#{date_start}","#{date_end}"];
+    [timeout:40][adiff:"#{date_start}","#{date_end}"];
     (
       node#{selector}(#{bbox});
       way#{selector}(#{bbox});
