@@ -222,13 +222,13 @@ module LogicalHistory
           next if T.unsafe(a.geos).nil?
 
           g_dist = (
-            if same_refs ||
-              b.geos == a.geos ||
-              (b.geos&.dimension == 2 && a.geos&.dimension == 2 && befores.size == 1 && afters.size == 1)
-              # Same refs or geom
-              # or
+            if same_refs
+              [0.0, nil, nil, 'same refs']
+            elsif b.geos == a.geos
+              [0.0, nil, nil, 'same geom']
+            elsif (b.geos&.dimension == 2 && a.geos&.dimension == 2 && befores.size == 1 && afters.size == 1)
               # Geom distance does not matter on 1x1 matrix, fast return
-              [0.0, nil, nil, 'same refs, same geom or 1x1 matrix']
+              [0.0, nil, nil, '1x1 matrix']
             else
               LogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
             end
@@ -567,11 +567,18 @@ module LogicalHistory
 
       paired.collect{ |c|
         if !c.before.nil? && !c.after.nil? && !T.unsafe(c.before&.geos).nil? && !T.unsafe(c.after&.geos).nil?
-          after = T.must(c.after)
-          before = T.must(c.before)
-          geom_distance = T.must(before.geos).distance(after.geos)
+          after_geos = T.must(c.after&.geos)
+          before_geos = T.must(c.before&.geos)
+          geom_distance = before_geos.distance(after_geos)
           if geom_distance > 0
-            c.reason.geom = (c.reason.geom || {}).merge({ distance: geom_distance })
+            c.reason.geom = (c.reason.geom || {}).merge({ min_distance: geom_distance })
+          end
+          if before_geos.dimension > 0 && after_geos.dimension > 0
+            # Only it not points, else it the same as min_distance
+            geom_distance = DistanceHausdorff.distance(before_geos, after_geos)
+            if geom_distance > 0
+              c.reason.geom = (c.reason.geom || {}).merge({ max_distance: geom_distance })
+            end
           end
         end
         c

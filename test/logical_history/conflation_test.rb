@@ -234,7 +234,7 @@ class TestConflation < Test::Unit::TestCase
       after_tags: { 'amenity' => 'bicycle_parking' },
       after_geom: '{"type":"Point","coordinates":[0, 2]}'
     )
-    assert_equal([0.0, nil, nil, 'matched main keys: amenity'], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
+    assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal({}, conflate_distances)
     assert_equal(
@@ -251,10 +251,10 @@ class TestConflation < Test::Unit::TestCase
       after_tags: { 'amenity' => 'bicycle_parking' },
       after_geom: '{"type":"Point","coordinates":[0, 0.5]}'
     )
-    assert_equal([0.0, nil, nil, 'matched main keys: amenity'], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
+    assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal([[before[0], after[0]]], conflate_distances.keys)
-    assert_equal([0.0, nil, nil, 'matched main keys: amenity'], T.must(conflate_distances.values[0])[0])
+    assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], T.must(conflate_distances.values[0])[0])
     assert_equal(0.0, T.must(conflate_distances.values[0])[2])
     assert_equal([[before[0], after[0], after[0]]], Conflation.conflate(before, after, @@demi_distance).collect(&:to_a))
   end

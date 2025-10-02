@@ -66,23 +66,24 @@ module LogicalHistory
       params(
         tags_a: T::Hash[String, String],
         tags_b: T::Hash[String, String],
-      ).returns(T.nilable(Float))
+      ).returns(T.nilable([Float, T::Array[String]]))
     }
     def self.key_val_main_distance(tags_a, tags_b)
       return nil if tags_a.empty? && tags_b.empty?
-      return 1.0 if tags_a.empty? || tags_b.empty?
+      return [1.0, []] if tags_a.empty? || tags_b.empty?
 
       keys = (tags_a.keys + tags_b.keys).uniq
-      keys.sum(0.0) { |key|
+      dt = keys.collect { |key|
         if tags_a[key] == tags_b[key]
-          0.0
+          [0.0, "#{key}=#{tags_a[key]}"]
         elsif key_of_same_class(key, tags_a[key], tags_b[key])
           # Same key with values in the same range class
-          0.5
+          [0.5, "#{key}=#{tags_a[key]}/#{tags_b[key]}"]
         else
-          1.0
+          [1.0, nil]
         end
-      } / keys.size
+      }
+      [dt.sum(0.0, &:first) / keys.size, dt.collect(&:last).compact]
     end
 
     # TODO: et les mulit valeurs ?
@@ -118,7 +119,7 @@ module LogicalHistory
       # Main tags
       main_tags_a = T.must(a)[0] || {}
       main_tags_b = T.must(b)[0] || {}
-      d_main = key_val_main_distance(main_tags_a, main_tags_b)
+      d_main, reason_main = key_val_main_distance(main_tags_a, main_tags_b)
       return if d_main.nil? || d_main >= 1.0
 
       # Symmetrical main tags difference
@@ -135,8 +136,8 @@ module LogicalHistory
 
       # TODO: Some tags are side tags of main tags, and we could move on one side along the main tag.
 
-      reason = (main_tags_a.keys & main_tags_b.keys).uniq.sort.join(', ')
-      [d, remaining_tags_a.presence, remaining_tags_b.presence, "matched main keys: #{reason}"]
+      reason = (reason_main || []).sort.join(', ')
+      [d, remaining_tags_a.presence, remaining_tags_b.presence, "matched tags: #{reason}"]
     end
   end
 end

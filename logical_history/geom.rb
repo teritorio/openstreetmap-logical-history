@@ -97,7 +97,7 @@ module LogicalHistory
           parts = exact_or_buffered_size_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos|
             intersection.dimension == 1 ? T.unsafe(geos).length : T.unsafe(geos).area
           }
-          [0.0, parts[1], parts[2], 'subpart']
+          [0.0, parts[1], parts[2], 'buffered subpart']
         else
           dim_a = a_over_b.dimension
           dim_b = b_over_a.dimension
