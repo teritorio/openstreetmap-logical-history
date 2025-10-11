@@ -27,7 +27,7 @@ docker compose run --rm script bundle exec rake test
 
 ## Server
 
-Run a small web server to explose the computation algorithm.
+Run a small web server to expose the computation algorithm.
 
 Enable server, and install required gems
 ```
