@@ -79,16 +79,6 @@ This conflation is performed iteratively on a set of criteria.
 
 The approach described here is the one currently implemented. Improvements are possible.
 
-### 4.1 Reconciliation by references
-
-The first criterion for finding objects is to use their business references. In OSM, there may be several reference tags.
-
-If in the before and after versions we find a single OSM object with the same set of references, then we consider that a match.
-
-The reference tags used are the “ref” tag and those beginning with “ref:”.
-
-In the future, we could handle cases where several OSM objects share the same references, as is the case for roads.
-
 ### 4.2 Reconciliation by distance
 
 For all remaining objects, a distance matrix is calculated between all OSM objects in the before version and those in the after version. This is not a geometric distance, but a distance measuring semantic and spatial similarity.
@@ -121,7 +111,21 @@ These calculations are performed using buffers to handle cases such as quasi-int
 
 This geometric distance has a value between 0 and 1.
 
-#### 4.3.2 Semantic distance between tags
+#### 4.3.2 Reconciliation by tags
+
+OSM tags are free-text key-value pairs. However, not all tags have the same role or importance and should be weighted as proposed by Samal et al. (2004)⁶.
+
+#### 4.3.3 Reconciliation by references
+
+The first criterion for finding objects is to use their business references. In OSM, there may be several reference tags.
+
+If in the before and after versions we find a single OSM object with the same set of references, then we consider that a match and that the distance between geometry on these objects is 0.
+
+The reference tags used are the “ref” tag and those beginning with “ref:”.
+
+In the future, we could handle cases where several OSM objects share the same references, as is the case for roads.
+
+#### 4.3.4 Semantic distance between tags
 
 OSM tags are free-text key-value pairs. However, not all tags have the same role or importance and should be weighted as proposed by Samal et al. (2004)[^6].
 
@@ -160,7 +164,7 @@ Finally, the distances of the two subgroups are added together and divided by tw
 
 This approach of weighting attributes according to their semantic importance is inspired by the work of McKenzie et al (2014) [^7] on matching user-generated points of interest. For the second subgroup, the nature of the tags may be used to calculate the distance rather than using a Levenshtein distance that is completely unrelated to the semantics of the content.
 
-###  4.4 Partial matching
+### 4.4 Partial matching
 
 When a before object is a sub-part of the after object, we will cut the geometry to perform only a partial match, as proposed by Adams et al (2015)[^8] for roadways.
 
