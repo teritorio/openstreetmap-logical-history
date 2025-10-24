@@ -2,6 +2,7 @@
 # typed: strict
 
 require 'sorbet-runtime'
+require 'levenshtein'
 
 
 module LogicalHistory
