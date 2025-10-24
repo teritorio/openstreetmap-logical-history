@@ -17,6 +17,7 @@ class TestConflation < Test::Unit::TestCase
     params(
       id: Integer,
       version: Integer,
+      deleted: T::Boolean,
       tags: T::Hash[String, String],
       geojson_geometry: String,
       srid: Integer,
@@ -25,6 +26,7 @@ class TestConflation < Test::Unit::TestCase
   def build_object(
     id: 1,
     version: 1,
+    deleted: false,
     tags: { 'highway' => 'a' },
     geojson_geometry: '{"type":"Point","coordinates":[0,0]}',
     srid: 4326
@@ -35,7 +37,7 @@ class TestConflation < Test::Unit::TestCase
         id: id,
         geojson_geometry: geojson_geometry,
         geos_factory: geos_factory,
-        deleted: false,
+        deleted: deleted,
         members: nil,
         version: version,
         # changesets: nil,
@@ -178,7 +180,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 1, geojson_geometry: geojson_geometry, tags: tags),
     ]
     after = [
-      build_object(id: 1, geojson_geometry: geojson_geometry, tags: tags).with(deleted: true),
+      build_object(id: 1, geojson_geometry: geojson_geometry, tags: tags, deleted: true),
       build_object(id: 2, geojson_geometry: geojson_geometry, tags: tags),
     ]
 
@@ -351,7 +353,7 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags),
     ]
     after = [
-      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags).with(deleted: true),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,200]]}', tags: tags, deleted: true),
       build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: tags),
       build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,100],[0,200]]}', tags: tags),
     ]
@@ -373,7 +375,7 @@ class TestConflation < Test::Unit::TestCase
       }),
     ]
     after = [
-      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}, deleted: true),
       build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'building' => 'house' }),
       build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
     ]
@@ -393,8 +395,8 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: { 'landuse' => 'residencial' }),
     ]
     after = [
-      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
-      build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}).with(deleted: true),
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}, deleted: true),
+      build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {}, deleted: true),
       build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'building' => 'house',
         'landuse' => 'residencial',
@@ -421,7 +423,7 @@ class TestConflation < Test::Unit::TestCase
       }),
     ]
     after = [
-      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {}).with(deleted: true),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {}, deleted: true),
       build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'amenity' => 'townhall',
         'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',

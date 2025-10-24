@@ -207,11 +207,13 @@ module OSMLogicalHistory
       remaning_before = T.let(nil, T.nilable(OSMObject))
       remaning_after = T.let(nil, T.nilable(OSMObject))
       if !T.unsafe(remaning_before_geom).nil?
-        remaning_before = key_min[0].with(geos: remaning_before_geom)
+        remaning_before = key_min[0].clone
+        remaning_before.geos = remaning_before_geom
         parts << [[remaning_before], afters]
       end
       if !T.unsafe(remaning_after_geom).nil?
-        remaning_after = key_min[1].with(geos: remaning_after_geom)
+        remaning_after = key_min[1].clone
+        remaning_after.geos = remaning_after_geom
         parts << [befores, [remaning_after]]
       end
       if !remaning_before.nil? && !remaning_after.nil?
@@ -245,12 +247,14 @@ module OSMLogicalHistory
       remaning_after_tags = dist_tags[2]
       remaning_before = T.let(nil, T.nilable(OSMObject))
       remaning_after = T.let(nil, T.nilable(OSMObject))
-      if !T.unsafe(remaning_before_tags).nil?
-        remaning_before = key_min[0].with(tags: remaning_before_tags)
+      if !remaning_before_tags.nil?
+        remaning_before = key_min[0].clone
+        remaning_before.tags = remaning_before_tags
         parts << [[remaning_before], afters]
       end
-      if !T.unsafe(remaning_after_tags).nil?
-        remaning_after = key_min[1].with(tags: remaning_after_tags)
+      if !remaning_after_tags.nil?
+        remaning_after = key_min[1].clone
+        remaning_after.tags = remaning_after_tags
         parts << [befores, [remaning_after]]
       end
       if !remaning_before.nil? && !remaning_after.nil?
@@ -348,8 +352,8 @@ module OSMLogicalHistory
       }.values.collect{ |group|
         # Merge geometry parts with same before and after objects
         T.must(group.reduce{ |sum, conflate|
-          sum.before = sum.before.with(geos: T.must(sum.before.geos).union(conflate.before.geos))
-          sum.after = sum.after.with(geos: T.must(sum.after.geos).union(conflate.after.geos))
+          sum.before.geos = T.must(sum.before.geos).union(conflate.before.geos)
+          sum.after.geos = T.must(sum.after.geos).union(conflate.after.geos)
           sum.reason.conflate += ' (+unicity)'
           sum
         })
@@ -418,10 +422,9 @@ module OSMLogicalHistory
         else
           # Merge remaining geom with already conflated main part
           p = block.call(paired)
-          union = p.with(
-            tags: p.tags.merge(b.tags),
-            geos: T.must(p.geos).union(b.geos)
-          )
+          union = p.clone
+          union.tags = p.tags.merge(b.tags)
+          union.geos = T.must(p.geos).union(b.geos)
           paired.send("#{key}=", union)
           false
         end
