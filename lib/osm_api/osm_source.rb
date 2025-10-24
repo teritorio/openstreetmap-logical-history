@@ -15,6 +15,8 @@ class OSMSource
   extend T::Sig
 
   class OSMObject < OSMLogicalHistory::OSMObject
+    extend T::Sig
+
     sig { returns(T::Hash[T.any(String, Symbol), T.untyped]) }
     def to_geojson
       {
