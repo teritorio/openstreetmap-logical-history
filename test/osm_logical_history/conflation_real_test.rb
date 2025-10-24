@@ -7,8 +7,8 @@ require 'json'
 require 'active_support/all'
 require './osm_api/overpass'
 
-Conflation = LogicalHistory::Conflation
-OSMObject = LogicalHistory::OSMObject
+Conflation = OSMLogicalHistory::Conflation
+OSMObject = OSMLogicalHistory::OSMObject
 
 class TestConflationReal < Test::Unit::TestCase
   extend T::Sig

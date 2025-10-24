@@ -5,7 +5,7 @@ require 'sorbet-runtime'
 require 'levenshtein'
 
 
-module LogicalHistory
+module OSMLogicalHistory
   module Tags
     extend T::Sig
 

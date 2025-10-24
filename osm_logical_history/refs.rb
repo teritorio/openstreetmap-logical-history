@@ -4,7 +4,7 @@
 require 'sorbet-runtime'
 
 
-module LogicalHistory
+module OSMLogicalHistory
   module Refs
     extend T::Sig
 

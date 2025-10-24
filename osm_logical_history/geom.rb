@@ -5,7 +5,7 @@ require 'sorbet-runtime'
 require 'rgeo'
 
 
-module LogicalHistory
+module OSMLogicalHistory
   module Geom
     extend T::Sig
 

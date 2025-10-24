@@ -6,7 +6,7 @@ require 'net/http'
 require 'uri'
 require 'json'
 require 'active_support/all'
-require './logical_history/conflation'
+require './osm_logical_history/conflation'
 require './osm_api/osm_source'
 
 

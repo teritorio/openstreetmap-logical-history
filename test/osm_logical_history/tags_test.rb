@@ -3,9 +3,9 @@
 
 require 'sorbet-runtime'
 require 'test/unit'
-require './logical_history/tags'
+require './osm_logical_history/tags'
 
-Tags = LogicalHistory::Tags
+Tags = OSMLogicalHistory::Tags
 
 class TestTags < Test::Unit::TestCase
   extend T::Sig

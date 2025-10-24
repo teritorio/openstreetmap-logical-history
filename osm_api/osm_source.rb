@@ -6,15 +6,15 @@ require 'net/http'
 require 'uri'
 require 'json'
 require 'active_support/all'
-require './logical_history/conflation'
+require './osm_logical_history/conflation'
 
 
-Conflation = LogicalHistory::Conflation
+Conflation = OSMLogicalHistory::Conflation
 
 class OSMSource
   extend T::Sig
 
-  class OSMObject < LogicalHistory::OSMObject
+  class OSMObject < OSMLogicalHistory::OSMObject
     sig { returns(T::Hash[T.any(String, Symbol), T.untyped]) }
     def to_geojson
       {
@@ -53,14 +53,14 @@ class OSMSource
 
   ID_CACHE = T.let(Hash.new { |h, k| h[k] = h.size }, T::Hash[String, Integer])
 
-  sig { params(object: T.nilable(LogicalHistory::OSMObject), is_before: T::Boolean).returns(T.nilable(Integer)) }
+  sig { params(object: T.nilable(OSMLogicalHistory::OSMObject), is_before: T::Boolean).returns(T.nilable(Integer)) }
   def self.id(object, is_before)
     return nil if object.nil?
 
     ID_CACHE["#{is_before ? 'b' : 'a'}#{object.objtype[0]}#{object.id}_#{object.version}"]
   end
 
-  sig { params(object: LogicalHistory::OSMObject).returns(String) }
+  sig { params(object: OSMLogicalHistory::OSMObject).returns(String) }
   def self.node(object)
     tags = object.tags.to_a.sort.collect{ |k, v| "#{k}=#{v[0..20]}" }.join("\n").gsub('"', '')
     "#{object.objtype[0]}#{object.id}_#{object.version} [label=\"#{object.objtype[0]}#{object.id} v#{object.version}\n\n#{tags}\"];"
@@ -142,10 +142,10 @@ class OSMSource
 
   sig {
     params(
-      data_start: T::Array[LogicalHistory::OSMObject],
-      data_end: T::Array[LogicalHistory::OSMObject],
+      data_start: T::Array[OSMLogicalHistory::OSMObject],
+      data_end: T::Array[OSMLogicalHistory::OSMObject],
       clip_polygon: T.nilable(RGeo::Feature::Polygon),
-    ).returns([T::Array[LogicalHistory::OSMObject], T::Array[LogicalHistory::OSMObject]])
+    ).returns([T::Array[OSMLogicalHistory::OSMObject], T::Array[OSMLogicalHistory::OSMObject]])
   }
   def self.filter_clip(data_start, data_end, clip_polygon)
     data_start_index = data_start.index_by{ |e| [e.objtype, e.id] }
@@ -178,11 +178,11 @@ class OSMSource
 
   sig {
     params(
-      data_start: T::Array[LogicalHistory::OSMObject],
-      data_end: T::Array[LogicalHistory::OSMObject],
+      data_start: T::Array[OSMLogicalHistory::OSMObject],
+      data_end: T::Array[OSMLogicalHistory::OSMObject],
       demi_distance: Float,
     ).returns(T::Array[[
-      T::Hash[Integer, LogicalHistory::OSMObject],
+      T::Hash[Integer, OSMLogicalHistory::OSMObject],
       T::Array[T::Hash[Symbol, T.untyped]]
     ]])
   }

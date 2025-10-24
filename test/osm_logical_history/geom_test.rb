@@ -3,9 +3,9 @@
 
 require 'sorbet-runtime'
 require 'test/unit'
-require './logical_history/geom'
+require './osm_logical_history/geom'
 
-Geom = LogicalHistory::Geom
+Geom = OSMLogicalHistory::Geom
 
 class TestGeom < Test::Unit::TestCase
   extend T::Sig

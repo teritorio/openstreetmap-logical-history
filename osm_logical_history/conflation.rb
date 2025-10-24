@@ -6,14 +6,14 @@ require 'set'
 require 'rgl/implicit'
 require 'rgl/connected_components'
 require 'active_support/core_ext/enumerable'
-require './logical_history/distance_hausdorff'
-require './logical_history/refs'
-require './logical_history/tags'
-require './logical_history/geom'
-require './logical_history/osm_object'
+require './osm_logical_history/distance_hausdorff'
+require './osm_logical_history/refs'
+require './osm_logical_history/tags'
+require './osm_logical_history/geom'
+require './osm_logical_history/osm_object'
 
 
-module LogicalHistory
+module OSMLogicalHistory
   module Conflation
     extend T::Sig
 
@@ -118,10 +118,10 @@ module LogicalHistory
       ).returns(T::Boolean)
     }
     def self.same_refs?(before_tags, after_tags)
-      before_refs = LogicalHistory::Refs.refs(before_tags).sort
+      before_refs = OSMLogicalHistory::Refs.refs(before_tags).sort
       return false if before_refs.empty?
 
-      after_refs = LogicalHistory::Refs.refs(after_tags).sort
+      after_refs = OSMLogicalHistory::Refs.refs(after_tags).sort
       before_refs == after_refs
     end
 
@@ -133,14 +133,14 @@ module LogicalHistory
       ).returns(
         T::Hash[
           [OSMObject, OSMObject],
-          [LogicalHistory::Tags::DistanceMeusure, LogicalHistory::Geom::DistanceMeusure, Float]
+          [OSMLogicalHistory::Tags::DistanceMeusure, OSMLogicalHistory::Geom::DistanceMeusure, Float]
         ],
       )
     }
     def self.conflate_matrix(befores, afters, demi_distance)
       distance_matrix = T.let({}, T::Hash[
         [OSMObject, OSMObject],
-        [LogicalHistory::Tags::DistanceMeusure, LogicalHistory::Geom::DistanceMeusure, Float]
+        [OSMLogicalHistory::Tags::DistanceMeusure, OSMLogicalHistory::Geom::DistanceMeusure, Float]
       ])
 
       befores.each{ |b|
@@ -149,7 +149,7 @@ module LogicalHistory
         afters.each{ |a|
           next if a.geojson_geometry.nil?
 
-          t_dist = LogicalHistory::Tags.tags_distance(b.tags, a.tags)
+          t_dist = OSMLogicalHistory::Tags.tags_distance(b.tags, a.tags)
           next if t_dist.nil?
 
           same_refs = same_refs?(a.tags, b.tags)
@@ -169,7 +169,7 @@ module LogicalHistory
               # Geom distance does not matter on 1x1 matrix, fast return
               [0.0, nil, nil, '1x1 matrix']
             else
-              LogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
+              OSMLogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
             end
           )
           next if g_dist.nil?
@@ -190,7 +190,7 @@ module LogicalHistory
         key_min: [OSMObject, OSMObject],
         befores: T::Set[OSMObject],
         afters: T::Set[OSMObject],
-        dist_geom: LogicalHistory::Geom::DistanceMeusure,
+        dist_geom: OSMLogicalHistory::Geom::DistanceMeusure,
       ).returns(T::Array[[
         T::Enumerable[OSMObject],
         T::Enumerable[OSMObject]
@@ -229,7 +229,7 @@ module LogicalHistory
         key_min: [OSMObject, OSMObject],
         befores: T::Set[OSMObject],
         afters: T::Set[OSMObject],
-        dist_tags: LogicalHistory::Tags::DistanceMeusure,
+        dist_tags: OSMLogicalHistory::Tags::DistanceMeusure,
       ).returns(T::Array[[
         T::Enumerable[OSMObject],
         T::Enumerable[OSMObject]

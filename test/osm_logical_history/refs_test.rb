@@ -3,9 +3,9 @@
 
 require 'sorbet-runtime'
 require 'test/unit'
-require './logical_history/refs'
+require './osm_logical_history/refs'
 
-Refs = LogicalHistory::Refs
+Refs = OSMLogicalHistory::Refs
 
 class TestRef < Test::Unit::TestCase
   extend T::Sig

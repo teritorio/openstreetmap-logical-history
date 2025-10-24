@@ -4,12 +4,12 @@
 require 'sorbet-runtime'
 require 'test/unit'
 require 'json'
-require './logical_history/conflation'
-require './logical_history/tags'
-require './logical_history/geom'
+require './osm_logical_history/conflation'
+require './osm_logical_history/tags'
+require './osm_logical_history/geom'
 
-Conflation = LogicalHistory::Conflation
-OSMObject = LogicalHistory::OSMObject
+Conflation = OSMLogicalHistory::Conflation
+OSMObject = OSMLogicalHistory::OSMObject
 
 class TestConflation < Test::Unit::TestCase
   extend T::Sig

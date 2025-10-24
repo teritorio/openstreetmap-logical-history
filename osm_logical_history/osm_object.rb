@@ -6,7 +6,7 @@ require 'rgeo'
 require 'rgeo/geo_json'
 require 'rgeo/proj4'
 
-module LogicalHistory
+module OSMLogicalHistory
   class OSMObject < T::InexactStruct
     extend T::Sig
 
