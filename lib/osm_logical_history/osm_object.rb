@@ -7,6 +7,8 @@ require 'rgeo/geo_json'
 require 'rgeo/proj4'
 
 module OSMLogicalHistory
+  extend T::Sig
+
   class OSMObject < T::InexactStruct
     extend T::Sig
 
@@ -44,24 +46,24 @@ module OSMLogicalHistory
     def hash
       [objtype, id, version, geojson_geometry].hash
     end
+  end
 
-    sig {
-      params(
-      local_srid: Integer
-    ).returns(
-        T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry))
-      )
-    }
-    def self.build_geos_factory(local_srid)
-      geo_factory = RGeo::Geos.factory(srid: 4326)
-      projection = RGeo::Geos.factory(srid: local_srid)
+  sig {
+    params(
+    local_srid: Integer
+  ).returns(
+      T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry))
+    )
+  }
+  def self.build_geos_factory(local_srid)
+    geo_factory = RGeo::Geos.factory(srid: 4326)
+    projection = RGeo::Geos.factory(srid: local_srid)
 
-      proc do |geojson_geometry|
-        decode = RGeo::GeoJSON.decode(geojson_geometry, geo_factory: geo_factory)
-        RGeo::Feature.cast(decode, project: true, factory: projection) if !decode.nil?
-      rescue RGeo::Error::InvalidGeometry
-        nil
-      end
+    proc do |geojson_geometry|
+      decode = RGeo::GeoJSON.decode(geojson_geometry, geo_factory: geo_factory)
+      RGeo::Feature.cast(decode, project: true, factory: projection) if !decode.nil?
+    rescue RGeo::Error::InvalidGeometry
+      nil
     end
   end
 end

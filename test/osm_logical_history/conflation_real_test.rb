@@ -64,7 +64,7 @@ class TestConflationReal < Test::Unit::TestCase
     '
 
     data_start, data_end = Overspass.parse_xml(xml)
-    geos_factory = OSMObject.build_geos_factory(@@srid)
+    geos_factory = OSMLogicalHistory.build_geos_factory(@@srid)
     data_start = Overspass.overpass_to_geojson(data_start, geos_factory)
     data_end = Overspass.overpass_to_geojson(data_end, geos_factory)
 

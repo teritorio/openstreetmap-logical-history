@@ -32,7 +32,7 @@ class TestConflation < Test::Unit::TestCase
     geojson_geometry: '{"type":"Point","coordinates":[0,0]}',
     srid: 4326
   )
-    geos_factory = OSMObject.build_geos_factory(srid)
+    geos_factory = OSMLogicalHistory.build_geos_factory(srid)
     OSMObject.new(
         objtype: 'n',
         id: id,

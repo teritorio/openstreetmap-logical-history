@@ -120,7 +120,7 @@ class Ohsome < OSMSource
   def self.struct(bbox, selector, date_start, date_end, srid, demi_distance)
     data_start, data_end = fetch_osm_at_date(bbox, selector, date_start, date_end)
 
-    geos_factory = OSMObject.build_geos_factory(srid)
+    geos_factory = OSMLogicalHistory.build_geos_factory(srid)
 
     data_start = to_osmobject(data_start, geos_factory)
     data_end = to_osmobject(data_end, geos_factory)
