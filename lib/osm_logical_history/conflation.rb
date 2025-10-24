@@ -6,11 +6,11 @@ require 'set'
 require 'rgl/implicit'
 require 'rgl/connected_components'
 require 'active_support/core_ext/enumerable'
-require './osm_logical_history/distance_hausdorff'
-require './osm_logical_history/refs'
-require './osm_logical_history/tags'
-require './osm_logical_history/geom'
-require './osm_logical_history/osm_object'
+require_relative 'distance_hausdorff'
+require_relative 'refs'
+require_relative 'tags'
+require_relative 'geom'
+require_relative 'osm_object'
 
 
 module OSMLogicalHistory

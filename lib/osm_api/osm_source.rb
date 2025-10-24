@@ -6,7 +6,7 @@ require 'net/http'
 require 'uri'
 require 'json'
 require 'active_support/all'
-require './osm_logical_history/conflation'
+require_relative '../osm_logical_history/conflation'
 
 
 Conflation = OSMLogicalHistory::Conflation

@@ -4,9 +4,9 @@
 require 'sorbet-runtime'
 require 'test/unit'
 require 'json'
-require './osm_logical_history/conflation'
-require './osm_logical_history/tags'
-require './osm_logical_history/geom'
+require_relative '../../lib/osm_logical_history/conflation'
+require_relative '../../lib/osm_logical_history/tags'
+require_relative '../../lib/osm_logical_history/geom'
 
 Conflation = OSMLogicalHistory::Conflation
 OSMObject = OSMLogicalHistory::OSMObject

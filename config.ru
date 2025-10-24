@@ -5,8 +5,8 @@ require 'bundler/setup'
 require 'hanami/api'
 require 'moneta'
 require 'json'
-require_relative 'osm_api/overpass'
-require_relative 'osm_api/ohsome'
+require_relative 'lib/osm_api/overpass'
+require_relative 'lib/osm_api/ohsome'
 
 if ENV['SENTRY_DSN'].present?
   puts ENV['SENTRY_DSN'].inspect

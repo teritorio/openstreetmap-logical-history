@@ -4,3 +4,4 @@
 .env
 .github
 sorbet
+*.gem

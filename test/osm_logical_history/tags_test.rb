@@ -3,7 +3,7 @@
 
 require 'sorbet-runtime'
 require 'test/unit'
-require './osm_logical_history/tags'
+require_relative '../../lib/osm_logical_history/tags'
 
 Tags = OSMLogicalHistory::Tags
 

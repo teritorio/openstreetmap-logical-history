@@ -5,7 +5,7 @@ require 'sorbet-runtime'
 require 'test/unit'
 require 'json'
 require 'active_support/all'
-require './osm_api/overpass'
+require_relative '../../lib/osm_api/overpass'
 
 Conflation = OSMLogicalHistory::Conflation
 OSMObject = OSMLogicalHistory::OSMObject
