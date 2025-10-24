@@ -83,7 +83,7 @@ class Overspass < OSMSource
       osm_data: T::Array[T::Hash[String, T.untyped]],
       geos_factory: T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry)),
     ).returns(
-      T::Array[OSMObject]
+      T::Array[OSMLogicalHistory::OSMObject]
     )
   }
   def self.overpass_to_geojson(osm_data, geos_factory)
@@ -150,7 +150,7 @@ class Overspass < OSMSource
       srid: Integer,
       demi_distance: Float
     ).returns(T::Array[[
-      T::Hash[Integer, OSMObject],
+      T::Hash[Integer, OSMLogicalHistory::OSMObject],
       T::Array[T::Hash[Symbol, T.untyped]]
     ]])
   }

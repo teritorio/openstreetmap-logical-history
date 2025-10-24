@@ -8,9 +8,6 @@ require_relative '../../lib/osm_logical_history/conflation'
 require_relative '../../lib/osm_logical_history/tags'
 require_relative '../../lib/osm_logical_history/geom'
 
-Conflation = OSMLogicalHistory::Conflation
-OSMObject = OSMLogicalHistory::OSMObject
-
 class TestConflation < Test::Unit::TestCase
   extend T::Sig
 
@@ -23,7 +20,7 @@ class TestConflation < Test::Unit::TestCase
       tags: T::Hash[String, String],
       geojson_geometry: String,
       srid: Integer,
-    ).returns(OSMObject)
+    ).returns(OSMLogicalHistory::OSMObject)
   }
   def build_object(
     id: 1,
@@ -33,7 +30,7 @@ class TestConflation < Test::Unit::TestCase
     srid: 4326
   )
     geos_factory = OSMLogicalHistory.build_geos_factory(srid)
-    OSMObject.new(
+    OSMLogicalHistory::OSMObject.new(
         objtype: 'n',
         id: id,
         geojson_geometry: geojson_geometry,
@@ -57,7 +54,7 @@ class TestConflation < Test::Unit::TestCase
       before_geom: String,
       after_geom: String,
       srid: Integer,
-    ).returns([T::Array[OSMObject], T::Array[OSMObject]])
+    ).returns([T::Array[OSMLogicalHistory::OSMObject], T::Array[OSMLogicalHistory::OSMObject]])
   }
   def build_objects(
     before_tags: { 'highway' => 'a' },
