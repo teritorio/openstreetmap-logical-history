@@ -18,7 +18,7 @@ module OSMLogicalHistory
     sig { returns(Integer) }
     attr_reader :id
 
-    sig { returns(String) }
+    sig { returns(T.nilable(String)) }
     attr_reader :geojson_geometry
 
     sig { returns(T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry))) }
@@ -46,7 +46,7 @@ module OSMLogicalHistory
       params(
         objtype: String,
         id: Integer,
-        geojson_geometry: String,
+        geojson_geometry: T.nilable(String),
         geos_factory: T.proc.params(geom: String).returns(T.nilable(RGeo::Feature::Geometry)),
         deleted: T::Boolean,
         members: T.nilable(T::Array[Integer]),
@@ -74,9 +74,12 @@ module OSMLogicalHistory
 
     sig { returns(T.nilable(RGeo::Feature::Geometry)) }
     def geos
+      geojson_geometry_ = geojson_geometry
+      return if geojson_geometry_.nil?
+
       if T.unsafe(@geos_internal).nil? && !@has_geos
         @has_geos = true
-        @geos_internal = geos_factory.call(geojson_geometry)
+        @geos_internal = geos_factory.call(geojson_geometry_)
       end
 
       @geos_internal

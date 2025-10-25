@@ -19,6 +19,7 @@ class OSMSource
 
     sig { returns(T::Hash[T.any(String, Symbol), T.untyped]) }
     def to_geojson
+      geojson_geometry_ = geojson_geometry
       {
         type: 'Feature',
         properties: {
@@ -34,7 +35,7 @@ class OSMSource
           # is_change: is_change,
           # group_ids: group_ids
         },
-        geometry: JSON.parse(geojson_geometry)
+        geometry: (JSON.parse(geojson_geometry_) if !geojson_geometry_.nil?)
       }
     end
   end
