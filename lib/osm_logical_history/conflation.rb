@@ -540,12 +540,10 @@ module OSMLogicalHistory
       vertices = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[[String, Integer], T::Array[ConflationNilable]])
       links.each{ |i|
         if !i.before.nil?
-          vertices[[T.must(i.before).objtype, T.must(i.before).id]]
-          vertices[[T.must(i.before).objtype, T.must(i.before).id]] << i
+          T.must(vertices[[T.must(i.before).objtype, T.must(i.before).id]]) << i
         end
         if !i.after.nil?
-          vertices[[T.must(i.after).objtype, T.must(i.after).id]]
-          vertices[[T.must(i.after).objtype, T.must(i.after).id]] << i
+          T.must(vertices[[T.must(i.after).objtype, T.must(i.after).id]]) << i
         end
       }
 
