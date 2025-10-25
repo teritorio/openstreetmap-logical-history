@@ -7,8 +7,8 @@ require 'net/http'
 require 'uri'
 require 'json'
 require 'active_support/all'
-require 'osm_logical_history/conflation'
-require 'osm_api/osm_source'
+require_relative '../osm_logical_history/conflation'
+require_relative 'osm_source'
 
 
 class Ohsome < OSMSource
