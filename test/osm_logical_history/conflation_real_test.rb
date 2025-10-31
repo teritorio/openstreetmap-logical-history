@@ -65,7 +65,7 @@ class TestConflationReal < Test::Unit::TestCase
     data_start = Overspass.overpass_to_geojson(data_start, geos_factory)
     data_end = Overspass.overpass_to_geojson(data_end, geos_factory)
 
-    conf = Conflation.conflate(data_start, data_end, @@demi_distance)
+    conf = Conflation.new.conflate(data_start, data_end, @@demi_distance)
 
     assert_equal 2, conf.size, conf.inspect
   end
