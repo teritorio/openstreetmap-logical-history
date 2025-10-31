@@ -274,6 +274,60 @@ module OSMLogicalHistory
       params(
         befores: T::Set[OSMObjectT],
         afters: T::Set[OSMObjectT],
+        distance_matrix: T::Hash[
+          [OSMObjectT, OSMObjectT],
+          [OSMLogicalHistory::Tags::DistanceMeusure, OSMLogicalHistory::Geom::DistanceMeusure, Float]
+        ],
+        demi_distance: Float,
+        dist: [OSMLogicalHistory::Tags::DistanceMeusure, OSMLogicalHistory::Geom::DistanceMeusure, Float],
+        key_min: [OSMObjectT, OSMObjectT],
+      ).returns(
+        [
+          T::Hash[
+            [OSMObjectT, OSMObjectT],
+            [OSMLogicalHistory::Tags::DistanceMeusure, OSMLogicalHistory::Geom::DistanceMeusure, Float]
+          ],
+          T::Set[OSMObjectT],
+          T::Set[OSMObjectT],
+        ],
+      )
+    }
+    def add_remaining_parts(befores, afters, distance_matrix, demi_distance, dist, key_min)
+      # Add the remaining geom parts to the matrix
+      new_befores = T.let(Set.new, T::Set[OSMObjectT])
+      new_afters = T.let(Set.new, T::Set[OSMObjectT])
+      if !T.unsafe(dist[1][1]).nil? || !T.unsafe(dist[1][2]).nil?
+        remaining_geom_parts(key_min, befores, afters, dist[1]).each{ |parts|
+          new_befores = new_befores.merge(parts[0])
+          new_afters = new_afters.merge(parts[1])
+        }
+      elsif !dist[0][1].nil? || !dist[0][2].nil?
+        remaining_tags_parts(key_min, befores, afters, dist[0]).each{ |parts|
+          new_befores = new_befores.merge(parts[0])
+          new_afters = new_afters.merge(parts[1])
+        }
+        # else
+        # TODO Handle case with reaming geom AND tags
+      end
+
+      distance_matrix_nb_na = conflate_matrix(new_befores, new_afters, demi_distance)
+      distance_matrix_nb_a = conflate_matrix(new_befores, afters, demi_distance)
+      distance_matrix_b_na = conflate_matrix(befores, new_afters, demi_distance)
+      distance_matrix = distance_matrix.merge(
+        distance_matrix_nb_na,
+        distance_matrix_nb_a,
+        distance_matrix_b_na,
+      )
+      befores = befores.merge(new_befores)
+      afters = afters.merge(new_afters)
+
+      [distance_matrix, befores, afters]
+    end
+
+    sig {
+      params(
+        befores: T::Set[OSMObjectT],
+        afters: T::Set[OSMObjectT],
         afters_index: T::Hash[[String, Integer], OSMObjectT],
         demi_distance: Float,
       ).returns([
@@ -305,33 +359,7 @@ module OSMLogicalHistory
 
         distance_matrix = distance_matrix.select{ |k, _v| k[0] != key_min[0] && k[1] != key_min[1] }
 
-        # Add the remaining geom parts to the matrix
-        new_befores = T.let(Set.new, T::Set[OSMObjectT])
-        new_afters = T.let(Set.new, T::Set[OSMObjectT])
-        if !T.unsafe(dist[1][1]).nil? || !T.unsafe(dist[1][2]).nil?
-          remaining_geom_parts(key_min, befores, afters, dist[1]).each{ |parts|
-            new_befores = new_befores.merge(parts[0])
-            new_afters = new_afters.merge(parts[1])
-          }
-        elsif !dist[0][1].nil? || !dist[0][2].nil?
-          remaining_tags_parts(key_min, befores, afters, dist[0]).each{ |parts|
-            new_befores = new_befores.merge(parts[0])
-            new_afters = new_afters.merge(parts[1])
-          }
-          # else
-          # TODO Handle case with reaming geom AND tags
-        end
-
-        distance_matrix_nb_na = conflate_matrix(new_befores, new_afters, demi_distance)
-        distance_matrix_nb_a = conflate_matrix(new_befores, afters, demi_distance)
-        distance_matrix_b_na = conflate_matrix(befores, new_afters, demi_distance)
-        distance_matrix = distance_matrix.merge(
-          distance_matrix_nb_na,
-          distance_matrix_nb_a,
-          distance_matrix_b_na,
-        )
-        befores = befores.merge(new_befores)
-        afters = afters.merge(new_afters)
+        distance_matrix, befores, afters = add_remaining_parts(befores, afters, distance_matrix, demi_distance, dist, key_min)
       end
 
       [paired, befores, afters]
