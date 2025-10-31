@@ -367,8 +367,8 @@ module OSMLogicalHistory
 
     sig {
       params(
-        paired: T::Array[T.any(Conflation[OSMObjectT], ConflationNilableOnly[OSMObjectT])],
-      ).returns(T::Array[T.any(Conflation[OSMObjectT], ConflationNilableOnly[OSMObjectT])])
+        paired: T::Array[ConflationNilableOnly[OSMObjectT]],
+      ).returns(T::Array[ConflationNilableOnly[OSMObjectT]])
     }
     def conflate_merge_deleted_created(paired)
       # Conflate of same object, vN -> nil + nil -> vM => vN -> vM
@@ -459,7 +459,7 @@ module OSMLogicalHistory
         befores: T::Enumerable[OSMObjectT],
         afters: T::Enumerable[OSMObjectT],
         demi_distance: Float,
-      ).returns(T::Array[T.any(Conflation[OSMObjectT], ConflationNilableOnly[OSMObjectT])])
+      ).returns(T::Array[ConflationNilableOnly[OSMObjectT]])
     }
     def conflate(befores, afters, demi_distance)
       befores_index = befores.index_by{ |b| [b.objtype, b.id] }
@@ -484,10 +484,11 @@ module OSMLogicalHistory
       befores = befores.select{ |b| !paired_deleted_ids.include?([b.objtype, b.id]) }
       paired_by_distance += paired_deleted
 
-      (
+      T.cast(
         paired_by_distance +
         befores.collect{ |b| ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: afters_index[[b.objtype, b.id]], reason: ConflationReason.new(conflate: 'same osm object')) } +
-        afters.collect{ |a| ConflationNilableOnly[OSMObjectT].new(after: a, reason: ConflationReason.new(conflate: 'remeaning only after object')) }
+        afters.collect{ |a| ConflationNilableOnly[OSMObjectT].new(after: a, reason: ConflationReason.new(conflate: 'remeaning only after object')) },
+        T::Array[ConflationNilableOnly[OSMObjectT]]
       ).collect{ |c|
         # Get original full objects (not remaining part)
         ConflationNilableOnly.new(
@@ -504,7 +505,7 @@ module OSMLogicalHistory
         befores: T::Enumerable[OSMObjectT],
         afters: T::Enumerable[OSMObjectT],
         demi_distance: Float,
-      ).returns(T::Array[T.any(Conflation[OSMObjectT], ConflationNilableOnly[OSMObjectT])])
+      ).returns(T::Array[ConflationNilableOnly[OSMObjectT]])
     }
     def conflate_with_simplification(befores, afters, demi_distance)
       paired = conflate(befores, afters, demi_distance)
@@ -535,12 +536,12 @@ module OSMLogicalHistory
         befores: T::Enumerable[OSMObjectT],
         afters: T::Enumerable[OSMObjectT],
         demi_distance: Float,
-      ).returns(T::Array[T::Array[T.any(Conflation[OSMObjectT], ConflationNilableOnly[OSMObjectT])]])
+      ).returns(T::Array[T::Array[ConflationNilableOnly[OSMObjectT]]])
     }
     def conflate_cluster(befores, afters, demi_distance)
       links = conflate_with_simplification(befores, afters, demi_distance)
 
-      vertices = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[[String, Integer], T::Array[T.any(Conflation[OSMObjectT], ConflationNilableOnly[OSMObjectT])]])
+      vertices = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[[String, Integer], T::Array[ConflationNilableOnly[OSMObjectT]]])
       links.each{ |i|
         if !i.before.nil?
           T.must(vertices[[T.must(i.before).objtype, T.must(i.before).id]]) << i
