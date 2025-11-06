@@ -22,7 +22,7 @@ end
 class App < Hanami::API
   use Sentry::Rack::CaptureExceptions
 
-  remote_api = ENV['REMOTE_API'] == 'ohsome' ? Ohsome : Overspass
+  remote_api = ENV['REMOTE_API'] == 'ohsome' ? Ohsome : Overpass
 
   cache = Moneta.build do
     adapter :LRUHash

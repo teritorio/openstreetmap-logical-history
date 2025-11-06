@@ -60,10 +60,10 @@ class TestConflationReal < Test::Unit::TestCase
     </osm>
     '
 
-    data_start, data_end = Overspass.parse_xml(xml)
+    data_start, data_end = Overpass.parse_xml(xml)
     geos_factory = OSMLogicalHistory.build_geos_factory(@@srid)
-    data_start = Overspass.overpass_to_geojson(data_start, geos_factory)
-    data_end = Overspass.overpass_to_geojson(data_end, geos_factory)
+    data_start = Overpass.overpass_to_geojson(data_start, geos_factory)
+    data_end = Overpass.overpass_to_geojson(data_end, geos_factory)
 
     conf = Conflation.new.conflate(data_start, data_end, @@demi_distance)
 

@@ -10,7 +10,7 @@ require_relative '../osm_logical_history/conflation'
 require_relative 'osm_source'
 
 
-class Overspass < OSMSource
+class Overpass < OSMSource
   extend T::Sig
 
   sig {
