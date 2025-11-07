@@ -585,8 +585,14 @@ module OSMLogicalHistory
         }
         g.adjacent_iterator { |x, b|
           T.must(vertices[x]).each { |a|
-            b.call([T.must(a.before).objtype, T.must(a.before).id]) if !a.before.nil?
-            b.call([T.must(a.after).objtype, T.must(a.after).id]) if !a.after.nil?
+            before = a.before
+            if !before.nil? && x != [before.objtype, before.id]
+              b.call([before.objtype, before.id])
+            end
+            after = a.after
+            if !after.nil? && x != [after.objtype, after.id]
+              b.call([after.objtype, after.id])
+            end
           }
         }
         g.directed = false
