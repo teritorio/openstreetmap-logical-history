@@ -20,6 +20,37 @@ module OSMLogicalHistory
 
     sig {
       params(
+        geom: RGeo::Feature::Geometry,
+      ).returns(Float)
+    }
+    def self.geom_diameter(geom)
+      ring = geom.envelope.exterior_ring
+      ring.point_n(0).distance(ring.point_n(2))
+    end
+
+    sig {
+      params(
+        geom: RGeo::Feature::Geometry,
+        x_min: Float,
+        y_min: Float,
+        x_max: Float,
+        y_max: Float,
+      ).returns(Float)
+    }
+    def self.buffer_size(geom, x_min, y_min, x_max, y_max)
+      diam = geom_diameter(geom)
+      if diam < x_min
+        y_min
+      elsif diam > x_max
+        y_max
+      else
+        # linerar interporlation
+        (diam - x_min) * (y_max - y_min) / (x_max - x_min) + y_min
+      end
+    end
+
+    sig {
+      params(
         geom_a: RGeo::Feature::Geometry,
         geom_b: RGeo::Feature::Geometry,
         demi_distance: Float,
@@ -85,8 +116,10 @@ module OSMLogicalHistory
       if !intersection.empty? && intersection.dimension == r_geom_a.dimension && intersection.dimension == r_geom_b.dimension
         # Compute: 1 - intersection / union
         # Compute buffered symetrical difference
-        a_over_b = T.let(r_geom_a - r_geom_b.buffer(20), RGeo::Feature::Geometry)
-        b_over_a = T.let(r_geom_b - r_geom_a.buffer(20), RGeo::Feature::Geometry)
+        buffer_size_b = buffer_size(r_geom_b, 3.0, 3.0, 40.0, 20.0)
+        buffer_size_a = buffer_size(r_geom_a, 3.0, 3.0, 40.0, 20.0)
+        a_over_b = T.let(r_geom_a - r_geom_b.buffer(buffer_size_b), RGeo::Feature::Geometry)
+        b_over_a = T.let(r_geom_b - r_geom_a.buffer(buffer_size_a), RGeo::Feature::Geometry)
 
         if a_over_b.empty? && b_over_a.empty?
           # Equality
