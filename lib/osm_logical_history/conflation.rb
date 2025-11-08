@@ -35,7 +35,7 @@ module OSMLogicalHistory
       prop :before, OSMObjectT
       prop :before_at_now, T.nilable(OSMObjectT)
       prop :after, OSMObjectT
-      prop :reason, ConflationReason
+      prop :conflation_reason, ConflationReason
 
       sig { returns([OSMObjectT, T.nilable(OSMObjectT), OSMObjectT]) }
       def to_a
@@ -79,7 +79,7 @@ module OSMLogicalHistory
       prop :before, T.nilable(OSMObjectT)
       prop :before_at_now, T.nilable(OSMObjectT)
       prop :after, T.nilable(OSMObjectT)
-      prop :reason, ConflationReason
+      prop :conflation_reason, ConflationReason
 
       sig { returns(T::Array[T.nilable(OSMObjectT)]) }
       def to_a
@@ -350,7 +350,7 @@ module OSMLogicalHistory
           before: key_min[0],
           before_at_now: afters_index[[key_min[0].objtype, key_min[0].id]],
           after: key_min[1],
-          reason: ConflationReason.new(
+          conflation_reason: ConflationReason.new(
             tags: { score: dist[0][0], reason: dist[0][3] }.compact,
             geom: { score: dist[1][0], reason: dist[1][3] }.compact,
             conflate: 'better score match'
@@ -389,7 +389,7 @@ module OSMLogicalHistory
         T.must(group.reduce{ |sum, conflate|
           sum.before.geos = T.must(sum.before.geos).union(conflate.before.geos)
           sum.after.geos = T.must(sum.after.geos).union(conflate.after.geos)
-          sum.reason.conflate += ' (+unicity)'
+          sum.conflation_reason.conflate += ' (+unicity)'
           sum
         })
       }
@@ -428,7 +428,7 @@ module OSMLogicalHistory
         merged << created[key]
         T.must(deleted[key]).after = T.must(created[key]&.after)
         c = T.must(deleted[key])
-        c.reason.conflate += ' (+deleted/created merge)'
+        c.conflation_reason.conflate += ' (+deleted/created merge)'
         c
       }
 
@@ -510,7 +510,7 @@ module OSMLogicalHistory
         b = befores_index[[a.objtype, a.id]]
         if !b.nil?
           paired_deleted_ids << [b.objtype, b.id]
-          ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: a, after: a, reason: ConflationReason.new(conflate: 'match delete with original object'))
+          ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: a, after: a, conflation_reason: ConflationReason.new(conflate: 'match delete with original object'))
         end
       }.compact
       befores = befores.select{ |b| !paired_deleted_ids.include?([b.objtype, b.id]) }
@@ -518,8 +518,8 @@ module OSMLogicalHistory
 
       T.cast(
         paired_by_distance +
-        befores.collect{ |b| ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: afters_index[[b.objtype, b.id]], reason: ConflationReason.new(conflate: 'same osm object')) } +
-        afters.collect{ |a| ConflationNilableOnly[OSMObjectT].new(after: a, reason: ConflationReason.new(conflate: 'remeaning only after object')) },
+        befores.collect{ |b| ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: afters_index[[b.objtype, b.id]], conflation_reason: ConflationReason.new(conflate: 'same osm object')) } +
+        afters.collect{ |a| ConflationNilableOnly[OSMObjectT].new(after: a, conflation_reason: ConflationReason.new(conflate: 'remeaning only after object')) },
         T::Array[ConflationNilableOnly[OSMObjectT]]
       ).collect{ |c|
         # Get original full objects (not remaining part)
@@ -527,7 +527,7 @@ module OSMLogicalHistory
           before: c.before.nil? ? nil : T.must(befores_index[[T.must(c.before).objtype, T.must(c.before).id]]),
           before_at_now: c.before_at_now,
           after: c.after.nil? ? nil : T.must(afters_index[[T.must(c.after).objtype, T.must(c.after).id]]),
-          reason: c.reason,
+          conflation_reason: c.conflation_reason,
         )
       }
     end
@@ -549,13 +549,13 @@ module OSMLogicalHistory
           before_geos = T.must(c.before&.geos)
           geom_distance = before_geos.distance(after_geos)
           if geom_distance > 0
-            c.reason.geom = (c.reason.geom || {}).merge({ min_distance: geom_distance })
+            c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ min_distance: geom_distance })
           end
           if before_geos.dimension > 0 && after_geos.dimension > 0
             # Only it not points, else it the same as min_distance
             geom_distance = DistanceHausdorff.distance(before_geos, after_geos)
             if geom_distance > 0
-              c.reason.geom = (c.reason.geom || {}).merge({ max_distance: geom_distance })
+              c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ max_distance: geom_distance })
             end
           end
         end

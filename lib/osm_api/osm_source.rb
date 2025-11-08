@@ -208,7 +208,7 @@ class OSMSource
           after: id(c.after, false),
           diff_attribs: c.diff_attribs.presence,
           diff_tags: c.diff_tags.presence,
-          reason: c.reason,
+          conflation_reason: c.conflation_reason,
         }.compact
       }
       os = conf.collect { |l|
