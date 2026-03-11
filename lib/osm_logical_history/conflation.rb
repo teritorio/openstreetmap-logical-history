@@ -552,7 +552,7 @@ module OSMLogicalHistory
             c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ min_distance: geom_distance })
           end
           if before_geos.dimension > 0 && after_geos.dimension > 0
-            # Only it not points, else it the same as min_distance
+            # Only if it is not points, else it the same as min_distance
             geom_distance = DistanceHausdorff.distance(before_geos, after_geos)
             if geom_distance > 0
               c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ max_distance: geom_distance })
