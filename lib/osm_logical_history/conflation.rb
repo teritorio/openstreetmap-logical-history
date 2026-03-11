@@ -518,7 +518,7 @@ module OSMLogicalHistory
 
       T.cast(
         paired_by_distance +
-        befores.collect{ |b| ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: afters_index[[b.objtype, b.id]], conflation_reason: ConflationReason.new(conflate: 'same osm object')) } +
+        befores.collect{ |b| ConflationNilableOnly[OSMObjectT].new(before: b, before_at_now: afters_index[[b.objtype, b.id]], conflation_reason: ConflationReason.new(conflate: 'remeaning only before object')) } +
         afters.collect{ |a| ConflationNilableOnly[OSMObjectT].new(after: a, conflation_reason: ConflationReason.new(conflate: 'remeaning only after object')) },
         T::Array[ConflationNilableOnly[OSMObjectT]]
       ).collect{ |c|
