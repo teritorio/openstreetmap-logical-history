@@ -49,7 +49,7 @@ class OSMSource
     ).void
   }
   def self.check_params!(bbox, _selector, date_start, date_end)
-    raise 'Date range too large (max 90 days)' if Date.parse(date_end) - Date.parse(date_start) > 90
+    raise 'Date range too large (max 1 year)' if Date.parse(date_end) - Date.parse(date_start) > 365
     raise 'Bounding box too large (max 0.2 degrees wide)' if bbox[2] - bbox[0] > 0.2
     raise 'Bounding box too large (max 0.2 degrees wide)' if bbox[3] - bbox[1] > 0.2
   end
