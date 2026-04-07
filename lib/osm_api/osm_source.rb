@@ -23,7 +23,7 @@ class OSMSource
       {
         type: 'Feature',
         properties: {
-          objtype: objtype,
+          objtype: objtype[0],
           id: id,
           deleted: deleted,
           members: members,
