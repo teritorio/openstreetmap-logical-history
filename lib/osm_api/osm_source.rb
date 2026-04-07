@@ -91,7 +91,7 @@ class OSMSource
         }
       }.flatten(1),
       metadata: {
-        links: objects_links_groups.each_with_index.to_h{ |objects_links, index| [index, objects_links[1]] },
+        links: objects_links_groups.collect(&:last),
         changesets: [],
       },
     }
