@@ -133,11 +133,11 @@ class OSMSource
   }
   def self.build_geos_bbox(geos_factory, bbox)
     g = { type: 'Polygon', coordinates: [[
-      [bbox[1], bbox[0]],
-      [bbox[1], bbox[2]],
-      [bbox[3], bbox[2]],
-      [bbox[3], bbox[0]],
-      [bbox[1], bbox[0]]
+      [bbox[0], bbox[1]],
+      [bbox[2], bbox[1]],
+      [bbox[2], bbox[3]],
+      [bbox[0], bbox[3]],
+      [bbox[0], bbox[1]]
     ]] }.to_json
     puts g
     T.cast(geos_factory.call(g), RGeo::Feature::Polygon)

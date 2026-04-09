@@ -71,7 +71,7 @@ class App < Hanami::API
     bbox = bbox.split(',').collect{ |c| Float(c, exception: true) }
     raise 'Invalid bbox' if bbox.size != 4 || T.must(bbox[0]) >= T.must(bbox[2]) || T.must(bbox[1]) >= T.must(bbox[3])
 
-    bbox = [T.must(bbox[1]), T.must(bbox[0]), T.must(bbox[3]), T.must(bbox[2])]
+    bbox = [T.must(bbox[0]), T.must(bbox[1]), T.must(bbox[2]), T.must(bbox[3])]
 
     selector = params[:selector] || '' # e.g. "[highway=residential]"
     date_start = params[:date_start]

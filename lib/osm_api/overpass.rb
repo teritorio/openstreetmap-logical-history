@@ -25,10 +25,10 @@ class Overpass < OSMSource
     check_params!(bbox, selector, date_start, date_end)
 
     overpass_url = 'https://overpass-api.de/api/interpreter'
-    bbox = bbox.join(',')
+    bbox = bbox.each_slice(2).collect(&:reverse).flatten.join(',')
 
     overpass_query = <<-QUERY
-    [timeout:40][adiff:"#{date_start}","#{date_end}"];
+    [timeout:120][adiff:"#{date_start}","#{date_end}"];
     (
       node#{selector}(#{bbox});
       way#{selector}(#{bbox});

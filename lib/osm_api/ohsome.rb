@@ -25,7 +25,7 @@ class Ohsome < OSMSource
   def self.fetch(path, bbox, _selector, dates)
     ohsome_url = "https://api.ohsome.org/v1/#{path}/geometry"
     data = {
-      bboxes: bbox.each_slice(2).collect(&:reverse).flatten.join(','),
+      bboxes: bbox.join(','),
       time: dates.join(','),
       # Todo convert selector to ohsome filter syntax
       # Very slow with type filter
