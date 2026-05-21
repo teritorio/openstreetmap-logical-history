@@ -34,6 +34,8 @@ class Overpass < OSMSource
       way#{selector}(#{bbox});
     );
     out meta geom;
+    relation#{selector}(#{bbox});
+    out meta geom(#{bbox});
     QUERY
     puts [overpass_url, overpass_query]
 
@@ -80,6 +82,42 @@ class Overpass < OSMSource
 
   sig {
     params(
+      node: T.nilable(T::Hash[String, T.untyped])
+    ).returns(T.nilable([Float, Float]))
+  }
+  def self.overpass_node_to_coordinate(node)
+    return if node.nil? || node['lat'].nil? || node['lon'].nil?
+
+    [node['lon'].to_f, node['lat'].to_f]
+  end
+
+  sig {
+    params(
+      way: T::Hash[String, T.untyped]
+    ).returns(T.nilable(T::Array[[Float, Float]]))
+  }
+  def self.overpass_way_to_coordinates(way)
+    return if !way['nd'].is_a?(Array)
+
+    coords = way['nd'].collect{ |node| overpass_node_to_coordinate(node) }.compact
+    coords if coords.size >= 2
+  end
+
+  sig {
+    params(
+      relation: T::Hash[String, T.untyped]
+    ).returns(T.nilable(T::Array[T::Array[[Float, Float]]]))
+  }
+  def self.overpass_relation_to_coordinates(relation)
+    return if !relation['member'].is_a?(Array)
+
+    relation['member'].select{ |member| member['type'] == 'way' }.collect{ |way|
+      overpass_way_to_coordinates(way)
+    }.compact.presence
+  end
+
+  sig {
+    params(
       osm_data: T::Array[T::Hash[String, T.untyped]],
       geos_factory: T.proc.params(geojson_geometry: String).returns(T.nilable(RGeo::Feature::Geometry)),
     ).returns(
@@ -95,41 +133,41 @@ class Overpass < OSMSource
     }.flatten(2)
 
     osm_data.collect{ |element|
+      geojson_geometry = (
+        case element['type']
+        when 'node'
+          coords = overpass_node_to_coordinate(element)
+          { 'type' => 'Point', 'coordinates' => coords } if !coords.nil?
+
+        when 'way'
+          coords = overpass_way_to_coordinates(element)
+          if coords.nil?
+            nil
+          elsif element['nd'][0] == element['nd'][-1]
+            coords << T.must(coords[0]) if coords.size >= 3 && coords[0] != coords[-1]
+            { 'type' => 'Polygon', 'coordinates' => [coords] }
+          elsif coords.size
+            { 'type' => 'LineString', 'coordinates' => coords }
+          end
+
+        when 'relation'
+          coords = overpass_relation_to_coordinates(element)
+          if coords.nil?
+            nil
+          elsif coords.size == 1
+            { 'type' => 'LineString', 'coordinates' => coords[0] }
+          else
+            { 'type' => 'MultiLineString', 'coordinates' => coords }
+          end
+        end
+      )
+      puts geojson_geometry.to_json
+      [element, geojson_geometry] if element['type'] != 'relation' || !geojson_geometry.nil?
+    }.compact.collect{ |element, geojson_geometry|
       OSMObject.new(
         objtype: element['type'],
         id: element['id'].to_i,
-        geojson_geometry: (
-          if element['type'] == 'node'
-            if !element['lat'].nil? && !element['lon'].nil?
-              {
-                'type' => 'Point',
-                'coordinates' => [element['lon'].to_f, element['lat'].to_f]
-              }
-            end
-          elsif element['type'] == 'way'
-            if element['nd'].nil?
-              nil
-            elsif element['nd'][0] == element['nd'][-1]
-              {
-                'type' => 'Polygon',
-                'coordinates' => [element['nd'].select{ |node|
-                  !node['lon'].nil? && !node['lat'].nil?
-                }.map{ |node|
-                  [node['lon'].to_f, node['lat'].to_f]
-                }]
-              }
-            else
-              {
-                'type' => 'LineString',
-                'coordinates' => element['nd'].select{ |node|
-                  !node['lon'].nil? && !node['lat'].nil?
-                }.map{ |node|
-                  [node['lon'].to_f, node['lat'].to_f]
-                }
-              }
-            end
-          end
-        ).to_json,
+        geojson_geometry: geojson_geometry.to_json,
         geos_factory: geos_factory,
         deleted: element['deleted'] || false,
         members: nil, ##################### TODO
