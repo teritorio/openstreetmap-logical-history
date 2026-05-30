@@ -149,6 +149,13 @@ module OSMLogicalHistory
         dist = dist_tags[0] + dist_geom[0] <=> other.dist_tags[0] + other.dist_geom[0]
         return dist if dist != 0
 
+        # Match smaller first
+        dist = (Geom.geom_diameter(T.must(before.geos)) <=> Geom.geom_diameter(T.must(other.before.geos)))
+        return dist if dist != 0
+
+        dist = (Geom.geom_diameter(T.must(after.geos)) <=> Geom.geom_diameter(T.must(other.after.geos)))
+        return dist if dist != 0
+
         [before, after] <=> [other.before, other.after]
       end
     end

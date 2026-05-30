@@ -25,6 +25,8 @@ module OSMLogicalHistory
       ).returns(Float)
     }
     def self.geom_diameter(geom)
+      return 0.0 if geom.empty? || geom.dimension == 0
+
       ring = geom.envelope.exterior_ring
       ring.point_n(0).distance(ring.point_n(2))
     end
