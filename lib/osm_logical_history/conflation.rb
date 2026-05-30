@@ -215,82 +215,26 @@ module OSMLogicalHistory
 
     sig {
       params(
-        cell: MatrixCell[OSMObjectT],
-        befores: T::Set[OSMObjectT],
-        afters: T::Set[OSMObjectT],
-      ).returns(T::Array[[
-        T::Enumerable[OSMObjectT],
-        T::Enumerable[OSMObjectT]
-      ]])
+        object: OSMObjectT,
+        geom: RGeo::Feature::Geometry,
+      ).returns(T::Enumerable[OSMObjectT])
     }
-    def remaining_geom_parts(cell, befores, afters)
-      parts = T.let([], T::Array[[
-        T::Enumerable[OSMObjectT],
-        T::Enumerable[OSMObjectT]
-      ]])
-
-      remaning_before_geom = cell.dist_geom[1]
-      remaning_after_geom = cell.dist_geom[2]
-      remaning_before = T.let(nil, T.nilable(OSMObjectT))
-      remaning_after = T.let(nil, T.nilable(OSMObjectT))
-      if !T.unsafe(remaning_before_geom).nil?
-        remaning_before = cell.before.clone
-        remaning_before.geos = remaning_before_geom
-        parts << [[remaning_before], afters]
-      end
-      if !T.unsafe(remaning_after_geom).nil?
-        remaning_after = cell.after.clone
-        remaning_after.geos = remaning_after_geom
-        parts << [befores, [remaning_after]]
-      end
-      if !remaning_before.nil? && !remaning_after.nil?
-        parts << [
-          [remaning_before],
-          [remaning_after]
-        ]
-      end
-
-      parts
+    def remaining_geom_parts(object, geom)
+      remaning = object.clone
+      remaning.geos = geom
+      [remaning]
     end
 
     sig {
       params(
-        cell: MatrixCell[OSMObjectT],
-        befores: T::Set[OSMObjectT],
-        afters: T::Set[OSMObjectT],
-      ).returns(T::Array[[
-        T::Enumerable[OSMObjectT],
-        T::Enumerable[OSMObjectT]
-      ]])
+        object: OSMObjectT,
+        tags: T::Hash[String, String],
+      ).returns(T::Enumerable[OSMObjectT])
     }
-    def remaining_tags_parts(cell, befores, afters)
-      parts = T.let([], T::Array[[
-        T::Enumerable[OSMObjectT],
-        T::Enumerable[OSMObjectT]
-      ]])
-
-      remaning_before_tags = cell.dist_tags[1]
-      remaning_after_tags = cell.dist_tags[2]
-      remaning_before = T.let(nil, T.nilable(OSMObjectT))
-      remaning_after = T.let(nil, T.nilable(OSMObjectT))
-      if !remaning_before_tags.nil?
-        remaning_before = cell.before.clone
-        remaning_before.tags = remaning_before_tags
-        parts << [[remaning_before], afters]
-      end
-      if !remaning_after_tags.nil?
-        remaning_after = cell.after.clone
-        remaning_after.tags = remaning_after_tags
-        parts << [befores, [remaning_after]]
-      end
-      if !remaning_before.nil? && !remaning_after.nil?
-        parts << [
-          [remaning_before],
-          [remaning_after]
-        ]
-      end
-
-      parts
+    def remaining_tags_parts(object, tags)
+      remaning = object.clone
+      remaning.tags = tags
+      [remaning]
     end
 
     sig {
@@ -313,15 +257,11 @@ module OSMLogicalHistory
       new_befores = T.let(Set.new, T::Set[OSMObjectT])
       new_afters = T.let(Set.new, T::Set[OSMObjectT])
       if !T.unsafe(cell.dist_geom[1]).nil? || !T.unsafe(cell.dist_geom[2]).nil?
-        remaining_geom_parts(cell, befores, afters).each{ |parts|
-          new_befores = new_befores.merge(parts[0])
-          new_afters = new_afters.merge(parts[1])
-        }
+        new_befores += remaining_geom_parts(cell.before, T.must(cell.dist_geom[1])) if !T.unsafe(cell.dist_geom[1]).nil?
+        new_afters += remaining_geom_parts(cell.after, T.must(cell.dist_geom[2])) if !T.unsafe(cell.dist_geom[2]).nil?
       elsif !cell.dist_tags[1].nil? || !cell.dist_tags[2].nil?
-        remaining_tags_parts(cell, befores, afters).each{ |parts|
-          new_befores = new_befores.merge(parts[0])
-          new_afters = new_afters.merge(parts[1])
-        }
+        new_befores += remaining_tags_parts(cell.before, T.must(cell.dist_tags[1])) if !cell.dist_tags[1].nil?
+        new_afters += remaining_tags_parts(cell.after, T.must(cell.dist_tags[2])) if !cell.dist_tags[2].nil?
         # else
         # TODO Handle case with reaming geom AND tags
       end
