@@ -12,6 +12,8 @@ module OSMLogicalHistory
   class OSMObject
     extend T::Sig
 
+    include Comparable
+
     sig { returns(String) }
     attr_reader :objtype
 
@@ -100,6 +102,11 @@ module OSMLogicalHistory
     sig { overridable.returns(Integer) }
     def hash
       [objtype, id, version, geojson_geometry].hash
+    end
+
+    sig { overridable.params(other: OSMObject).returns(Integer) }
+    def <=>(other)
+      [objtype, id, version, geojson_geometry, object_id] <=> [other.objtype, other.id, other.version, other.geojson_geometry, object_id]
     end
   end
 

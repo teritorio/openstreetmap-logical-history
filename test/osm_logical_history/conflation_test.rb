@@ -218,7 +218,7 @@ class TestConflation < Test::Unit::TestCase
     )
     assert_equal(nil, Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.new.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
-    assert_equal({}, conflate_distances)
+    assert(conflate_distances.empty?)
     assert_equal(
       [[before[0], after[0], nil], [nil, nil, after[0]]],
       Conflation.new.conflate(before, after, @@demi_distance).collect(&:to_a)
@@ -235,7 +235,7 @@ class TestConflation < Test::Unit::TestCase
     )
     assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.new.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
-    assert_equal({}, conflate_distances)
+    assert(conflate_distances.empty?)
     assert_equal(
       [[before[0], after[0], nil], [nil, nil, after[0]]],
       Conflation.new.conflate(before, after, @@demi_distance).collect(&:to_a)
@@ -252,9 +252,9 @@ class TestConflation < Test::Unit::TestCase
     )
     assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], Tags.tags_distance(T.must(before[0]).tags, T.must(after[0]).tags))
     conflate_distances = Conflation.new.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
-    assert_equal([[before[0], after[0]]], conflate_distances.keys)
-    assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], T.must(conflate_distances.values[0])[0])
-    assert_equal(0.0, T.must(conflate_distances.values[0])[2])
+    assert_equal([[before[0], after[0]]], conflate_distances.collect{ |cell| [cell.before, cell.after] })
+    assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], T.must(conflate_distances.first).dist_tags)
+    assert_equal(0.0, T.must(conflate_distances.first).dist_id)
     assert_equal([[before[0], after[0], after[0]]], Conflation.new.conflate(before, after, @@demi_distance).collect(&:to_a))
   end
 
@@ -271,7 +271,7 @@ class TestConflation < Test::Unit::TestCase
       srid: srid,
     )
     conflate_distances = Conflation.new.conflate_matrix(before.to_set, after.to_set, demi_distance)
-    assert_equal([], conflate_distances.keys)
+    assert_equal([], conflate_distances.collect{ |cell| [cell.before, cell.after] })
     assert_equal([[before[0], after[0], nil], [nil, nil, after[0]]], Conflation.new.conflate(before, after, demi_distance).collect(&:to_a))
   end
 
@@ -308,7 +308,7 @@ class TestConflation < Test::Unit::TestCase
     ]
 
     conflate_distances = Conflation.new.conflate_matrix(before.to_set, after.to_set, demi_distance)
-    assert_equal(4, conflate_distances.keys.size)
+    assert_equal(4, conflate_distances.size)
     assert_equal(
       [[before[0], after[0], after[0]], [before[1], after[1], after[1]]],
       Conflation.new.conflate(before, after, demi_distance).collect(&:to_a)

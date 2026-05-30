@@ -108,6 +108,7 @@ GEM
       rbs (>= 3.4.4)
     rbs (3.9.5)
       logger
+    rbtree (0.4.6)
     regexp_parser (2.11.3)
     rego (4.2.2)
       listen (~> 3.9)
@@ -166,6 +167,8 @@ GEM
     sorbet-static-and-runtime (0.6.12586)
       sorbet (= 0.6.12586)
       sorbet-runtime (= 0.6.12586)
+    sorted_set (1.1.0)
+      rbtree
     spoom (1.6.3)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
@@ -223,6 +226,7 @@ DEPENDENCIES
   sorbet
   sorbet-rails
   sorbet-runtime
+  sorted_set (~> 1.1)
   tapioca
   test-unit
 

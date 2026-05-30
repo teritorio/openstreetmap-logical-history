@@ -13,8 +13,10 @@ gem 'rgeo-geojson'
 gem 'rgeo-proj4'
 gem 'rgl'
 gem 'sorbet-runtime'
+gem 'sorted_set', '~> 1.1'
 
 group :server, optional: true do
+  gem 'async', '~> 2.33'
   gem 'hanami-api'
   gem 'moneta', '~> 1.6'
   gem 'puma', '~> 6.0'
@@ -37,5 +39,3 @@ group :development do
   # gem 'racc'
   # gem 'rbi'
 end
-
-gem 'async', '~> 2.33'

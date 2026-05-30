@@ -38,6 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rgeo-proj4', '~> 4.0.0'
   spec.add_dependency 'rgl', '~> 0.6.6'
   spec.add_dependency 'sorbet-runtime', '~> 0.6.12586'
+  spec.add_dependency 'sorted_set', '~> 1.1'
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
