@@ -3,6 +3,7 @@
 
 require 'sorbet-runtime'
 require 'rgeo'
+require_relative 'geom_snap'
 
 
 module OSMLogicalHistory
@@ -137,6 +138,15 @@ module OSMLogicalHistory
         # Point never intersects, unless they are the same
         d = log_distance(r_geom_a, r_geom_b, demi_distance)
         return d <= 0.5 ? [d * 2, nil, nil, 'point distance'] : nil
+      end
+
+      if r_geom_a.geometry_type == RGeo::Feature::LineString && r_geom_b.geometry_type == RGeo::Feature::LineString
+        # Snap lines to each other to avoid small misalignement
+        r_geom_a, r_geom_b = LineStringSnapper.snap(
+          T.cast(r_geom_a, RGeo::Feature::LineString),
+          T.cast(r_geom_b, RGeo::Feature::LineString),
+          1.0 # m
+        )
       end
 
       intersection = r_geom_a.intersection(r_geom_b)
