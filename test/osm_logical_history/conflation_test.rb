@@ -11,6 +11,10 @@ require_relative '../../lib/osm_logical_history/geom'
 class TestConflation < Test::Unit::TestCase
   extend T::Sig
 
+  Tags = OSMLogicalHistory::Tags
+  Geom = OSMLogicalHistory::Geom
+  Conflation = OSMLogicalHistory::Conflation
+
   @@demi_distance = T.let(1.0, Float) # m
 
   sig {

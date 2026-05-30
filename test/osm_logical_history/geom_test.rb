@@ -5,10 +5,11 @@ require 'sorbet-runtime'
 require 'test/unit'
 require_relative '../../lib/osm_logical_history/geom'
 
-Geom = OSMLogicalHistory::Geom
 
 class TestGeom < Test::Unit::TestCase
   extend T::Sig
+
+  Geom = OSMLogicalHistory::Geom
 
   sig { void }
   def test_geom_score

@@ -5,10 +5,11 @@ require 'sorbet-runtime'
 require 'test/unit'
 require_relative '../../lib/osm_logical_history/refs'
 
-Refs = OSMLogicalHistory::Refs
 
 class TestRef < Test::Unit::TestCase
   extend T::Sig
+
+  Refs = OSMLogicalHistory::Refs
 
   sig { void }
   def test_refs

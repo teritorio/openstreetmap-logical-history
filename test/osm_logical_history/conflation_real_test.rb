@@ -10,6 +10,8 @@ require_relative '../../lib/osm_api/overpass'
 class TestConflationReal < Test::Unit::TestCase
   extend T::Sig
 
+  Conflation = OSMLogicalHistory::Conflation
+
   @@demi_distance = T.let(100.0, Float) # m
   @@srid = T.let(2154, Integer)
 

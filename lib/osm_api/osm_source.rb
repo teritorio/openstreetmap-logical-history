@@ -9,8 +9,6 @@ require 'active_support/all'
 require_relative '../osm_logical_history/conflation'
 
 
-Conflation = OSMLogicalHistory::Conflation
-
 class OSMSource
   extend T::Sig
 
@@ -196,7 +194,7 @@ class OSMSource
     data_start = data_start.select{ |e| !e.tags.empty? || data_end_with_tags_ids.include?([e.objtype, e.id]) }
     data_end = data_end.select{ |e| !e.tags.empty? || data_start_with_tags_ids.include?([e.objtype, e.id]) }
 
-    conf_group = Conflation[OSMLogicalHistory::OSMObject].new.conflate_cluster(data_start, data_end, demi_distance)
+    conf_group = OSMLogicalHistory::Conflation[OSMLogicalHistory::OSMObject].new.conflate_cluster(data_start, data_end, demi_distance)
 
     objects = data_start.index_by{ |e| id(e, true) }.merge(data_end.index_by{ |e| id(e, false) })
     conf_group.collect { |conf|

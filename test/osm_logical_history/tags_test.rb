@@ -5,10 +5,11 @@ require 'sorbet-runtime'
 require 'test/unit'
 require_relative '../../lib/osm_logical_history/tags'
 
-Tags = OSMLogicalHistory::Tags
 
 class TestTags < Test::Unit::TestCase
   extend T::Sig
+
+  Tags = OSMLogicalHistory::Tags
 
   sig { void }
   def test_key_val_main_distance
