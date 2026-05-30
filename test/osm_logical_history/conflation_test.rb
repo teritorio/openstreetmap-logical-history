@@ -258,7 +258,6 @@ class TestConflation < Test::Unit::TestCase
     conflate_distances = Conflation.new.conflate_matrix(before.to_set, after.to_set, @@demi_distance)
     assert_equal([[before[0], after[0]]], conflate_distances.collect{ |cell| [cell.before, cell.after] })
     assert_equal([0.0, nil, nil, 'matched tags: amenity=bicycle_parking'], T.must(conflate_distances.first).dist_tags)
-    assert_equal(0.0, T.must(conflate_distances.first).dist_id)
     assert_equal([[before[0], after[0], after[0]]], Conflation.new.conflate(before, after, @@demi_distance).collect(&:to_a))
   end
 

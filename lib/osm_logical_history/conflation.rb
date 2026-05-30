@@ -139,7 +139,6 @@ module OSMLogicalHistory
       prop :after, OSMObjectT
       prop :dist_tags, OSMLogicalHistory::Tags::DistanceMeusure
       prop :dist_geom, OSMLogicalHistory::Geom::DistanceMeusure
-      prop :dist_id, Float
 
       sig {
         params(
@@ -147,7 +146,7 @@ module OSMLogicalHistory
         ).returns(Integer)
       }
       def <=>(other)
-        dist = dist_tags[0] + dist_geom[0] + dist_id <=> other.dist_tags[0] + other.dist_geom[0] + other.dist_id
+        dist = dist_tags[0] + dist_geom[0] <=> other.dist_tags[0] + other.dist_geom[0]
         return dist if dist != 0
 
         [before, after] <=> [other.before, other.after]
@@ -205,7 +204,6 @@ module OSMLogicalHistory
             after: a,
             dist_tags: t_dist,
             dist_geom: g_dist,
-            dist_id: b.objtype == a.objtype && b.id == a.id ? 0.0 : 0.000001,
           )
         }
       }
