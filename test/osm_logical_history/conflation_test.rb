@@ -371,6 +371,31 @@ class TestConflation < Test::Unit::TestCase
   end
 
   sig { void }
+  def test_conflate_splited_way_gap
+    tags = {
+      'highway' => 'residential',
+    }
+    before = [
+      build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,300]]}', tags: tags),
+    ]
+    after = [
+      build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,100],[0,200]]}', tags: tags),
+    ]
+
+    paired, befores, afters = Conflation.new.conflate_core(Set.new(before), Set.new(after), {}, @@demi_distance)
+    assert_equal(1, paired.size, paired)
+    assert_equal(2, befores.size, befores)
+    assert_equal(0, afters.size, afters)
+
+    conflations = Conflation.new.conflate(before, after, @@demi_distance)
+    assert_equal(1, conflations.size, conflations)
+    assert_equal(
+      [[before[0], nil, after[0]]].collect{ |t| t.collect{ |i| i&.id } }.sort,
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
+    )
+  end
+
+  sig { void }
   def test_conflate_splited_tags
     before = [
       build_object(id: 1, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {

@@ -95,13 +95,13 @@ module OSMLogicalHistory
 
     sig { overridable.params(other: OSMObject).returns(T::Boolean) }
     def eql?(other)
-      objtype == other.objtype && id == other.id && version == other.version && geojson_geometry == other.geojson_geometry
+      objtype == other.objtype && id == other.id && version == other.version && geojson_geometry == other.geojson_geometry && geos == other.geos
     end
     alias == eql?
 
     sig { overridable.returns(Integer) }
     def hash
-      [objtype, id, version, geojson_geometry].hash
+      [objtype, id, version, geojson_geometry, geos].hash
     end
 
     sig { overridable.params(other: OSMObject).returns(Integer) }

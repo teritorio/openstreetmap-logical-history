@@ -220,9 +220,18 @@ module OSMLogicalHistory
       ).returns(T::Enumerable[OSMObjectT])
     }
     def remaining_geom_parts(object, geom)
-      remaning = object.clone
-      remaning.geos = geom
-      [remaning]
+      geoms = (
+        if [RGeo::Feature::MultiPoint, RGeo::Feature::MultiLineString, RGeo::Feature::MultiPolygon].include?(geom.geometry_type)
+          T.cast(geom, RGeo::Feature::GeometryCollection).each.to_a
+        else
+          [geom]
+        end
+      )
+      geoms.collect{ |geom_|
+        remaning = object.clone
+        remaning.geos = geom_.clone
+        remaning
+      }
     end
 
     sig {
