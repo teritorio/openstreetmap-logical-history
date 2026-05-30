@@ -66,6 +66,33 @@ module OSMLogicalHistory
 
     sig {
       params(
+        multilinestring: RGeo::Feature::Geometry
+      ).returns(RGeo::Feature::Geometry)
+    }
+    def self.concat_multilinestring(multilinestring)
+      if multilinestring.geometry_type.type_name == 'MultiLineString'
+        multilinestring = T.cast(multilinestring, RGeo::Feature::MultiLineString)
+        if multilinestring.num_geometries > 1
+          multilinestring = multilinestring.factory.multi_line_string(multilinestring.each.reduce([]) { |acc, geom|
+            if !acc.empty? && acc[-1].end_point.equals?(geom.start_point)
+              acc[-1] = multilinestring.factory.line_string(acc[-1].points + geom.points[1..])
+              acc
+            else
+              acc + [geom]
+            end
+          })
+        end
+
+        if multilinestring.num_geometries == 1
+          multilinestring = multilinestring.geometry_n(0)
+        end
+      end
+
+      multilinestring
+    end
+
+    sig {
+      params(
         r_geom_a: RGeo::Feature::Geometry,
         r_geom_b: RGeo::Feature::Geometry,
         a_over_b: RGeo::Feature::Geometry,
@@ -88,6 +115,8 @@ module OSMLogicalHistory
 
       # Prefer exact distance if it's more than 60% of the buffered distance
       if exact_distance / buffered_distance > 0.6
+        exact_a_over_b = concat_multilinestring(exact_a_over_b)
+        exact_b_over_a = concat_multilinestring(exact_b_over_a)
         [exact_distance, exact_a_over_b.empty? ? nil : exact_a_over_b, exact_b_over_a.empty? ? nil : exact_b_over_a, 'intersection over union, exact intersection']
       else
         [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? b_over_a : nil, 'intersection over union, distance buffered intersection']
