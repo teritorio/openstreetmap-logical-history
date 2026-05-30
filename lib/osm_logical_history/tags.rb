@@ -3,6 +3,7 @@
 
 require 'sorbet-runtime'
 require 'levenshtein'
+require 'active_support/core_ext/object/blank'
 
 
 module OSMLogicalHistory
