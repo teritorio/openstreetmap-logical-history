@@ -7,6 +7,7 @@ require 'moneta'
 require 'json'
 require_relative 'lib/osm_api/overpass'
 require_relative 'lib/osm_api/ohsome'
+require_relative 'lib/osm_api/smart'
 
 if ENV['SENTRY_DSN'].present?
   puts ENV['SENTRY_DSN'].inspect
@@ -22,7 +23,7 @@ end
 class App < Hanami::API
   use Sentry::Rack::CaptureExceptions
 
-  remote_api = ENV['REMOTE_API'] == 'ohsome' ? Ohsome : Overpass
+  remote_api = { 'ohsome' => Ohsome, 'overpass' => Overpass, 'smart' => Smart }[ENV.fetch('REMOTE_API', nil)] || Overpass
 
   cache = Moneta.build do
     adapter :LRUHash
