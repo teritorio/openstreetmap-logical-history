@@ -574,4 +574,39 @@ class TestConflation < Test::Unit::TestCase
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
   end
+
+  sig { void }
+  def test_conflate_split_highway4
+    before = [
+      build_object(id: 1, version: 1, srid: 2154, geojson_geometry: {
+        type: 'LineString',
+        coordinates: [[-1.4034453, 43.3360813], [-1.4033343, 43.3358179], [-1.4031924, 43.3355178], [-1.4030766, 43.3352998], [-1.4029547, 43.3351055], [-1.4028228, 43.3349246], [-1.4024643, 43.3344509], [-1.4023346, 43.3342932], [-1.4020840, 43.3339734], [-1.4018359, 43.3336668], [-1.4013838, 43.3332151], [-1.4011433, 43.3330160], [-1.4008315, 43.3327707], [-1.4005010, 43.3325491], [-1.4002818, 43.3324164], [-1.4000438, 43.3322838], [-1.3999341, 43.3322206], [-1.3993414, 43.3319266], [-1.3990417, 43.3317939], [-1.3984209, 43.3315511], [-1.3976808, 43.3312693]],
+      }.to_json),
+    ]
+    after = [
+      build_object(id: 1, version: 2, srid: 2154, geojson_geometry: {
+        type: 'LineString',
+        coordinates: [[-1.4034453, 43.3360813], [-1.4033343, 43.3358179], [-1.4031924, 43.3355178], [-1.4030766, 43.3352998], [-1.4029547, 43.3351055], [-1.4028228, 43.3349246], [-1.4024643, 43.3344509], [-1.4023346, 43.3342932], [-1.4020840, 43.3339734], [-1.4018359, 43.3336668], [-1.4013838, 43.3332151], [-1.4011433, 43.3330160], [-1.4008315, 43.3327707]],
+      }.to_json),
+      build_object(id: 2, version: 1, srid: 2154, geojson_geometry: {
+        type: 'LineString',
+        coordinates: [[-1.4000438, 43.3322838], [-1.3999341, 43.3322206]],
+      }.to_json),
+      build_object(id: 3, version: 1, srid: 2154, geojson_geometry: {
+        type: 'LineString',
+        coordinates: [[-1.3999341, 43.3322206], [-1.3993414, 43.3319266], [-1.3990417, 43.3317939], [-1.3984209, 43.3315511], [-1.3976808, 43.3312693]],
+      }.to_json),
+      build_object(id: 4, version: 1, srid: 2154, geojson_geometry: {
+        type: 'LineString',
+        coordinates: [[-1.4008315, 43.3327707], [-1.4005010, 43.3325491], [-1.4002818, 43.3324164], [-1.4000438, 43.3322838]],
+      }.to_json),
+    ]
+
+    conflations = OSMLogicalHistory::Conflation.new.conflate_with_simplification(before, after, @@demi_distance)
+    assert_equal(4, conflations.size, conflations)
+    assert_equal(
+      [[1, 1, 1], [1, 1, 2], [1, 1, 3], [1, 1, 4]].sort,
+      conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
+    )
+  end
 end
