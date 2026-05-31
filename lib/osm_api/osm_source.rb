@@ -137,7 +137,6 @@ class OSMSource
       [bbox[0], bbox[3]],
       [bbox[0], bbox[1]]
     ]] }.to_json
-    puts g
     T.cast(geos_factory.call(g), RGeo::Feature::Polygon)
   end
 

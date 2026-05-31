@@ -161,7 +161,6 @@ class Overpass < OSMSource
           end
         end
       )
-      puts geojson_geometry.to_json
       [element, geojson_geometry] if element['type'] != 'relation' || !geojson_geometry.nil?
     }.compact.collect{ |element, geojson_geometry|
       OSMObject.new(
