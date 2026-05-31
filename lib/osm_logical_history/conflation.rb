@@ -195,13 +195,7 @@ module OSMLogicalHistory
               # Geom distance does not matter on 1x1 matrix, fast return
               [0.0, nil, nil, '1x1 matrix']
             else
-              g = OSMLogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
-              if !g.nil? && same_refs
-                # Override geom distance to 0 if same refs
-                [0.0, g[1], g[2], 'same refs']
-              else
-                g
-              end
+              OSMLogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
             end
           )
           next if g_dist.nil?
