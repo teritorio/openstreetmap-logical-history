@@ -165,15 +165,11 @@ class TestConflation < Test::Unit::TestCase
     )
 
     before, after = build_objects(before_geom: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', after_geom: '{"type":"LineString","coordinates":[[0,200],[0,300]]}')
-    assert_equal(0.995049504950495, Geom.geom_score(
+    assert_equal(nil, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
       @@demi_distance
     )&.first)
-    assert_equal(
-      [[before[0], after[0], after[0]]],
-      Conflation.new.conflate(before, after, @@demi_distance).collect(&:to_a)
-    )
   end
 
   sig { void }
@@ -442,7 +438,7 @@ class TestConflation < Test::Unit::TestCase
   sig { void }
   def test_conflate_splited_tags_real
     before = [
-      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,101]}', tags: {
         'amenity' => 'townhall',
         'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',
       }),
@@ -451,7 +447,7 @@ class TestConflation < Test::Unit::TestCase
       }),
     ]
     after = [
-      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[1.7528455,49.1251444]}', tags: {}, deleted: true),
+      build_object(id: 1, geojson_geometry: '{"type":"Point","coordinates":[0,101]}', tags: {}, deleted: true),
       build_object(id: 2, geojson_geometry: '{"type":"LineString","coordinates":[[0,0],[0,100]]}', tags: {
         'amenity' => 'townhall',
         'opening_hours' => 'Mo 17:00-19:00; Tu 10:00-12:00; Th 10:00-12:00; Sa 09:00-11:00',

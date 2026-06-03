@@ -191,7 +191,10 @@ module OSMLogicalHistory
         end
       else
         # Else, use real distance + bias because no intersection
-        d = 0.5 + log_distance(r_geom_a, r_geom_b, demi_distance) / 2
+        d = log_distance(r_geom_a, r_geom_b, demi_distance)
+        return nil if d > 0.5
+
+        d = 0.5 + d
         [d, nil, nil, 'log euclidean distance + bias']
       end
     rescue RGeo::Error::InvalidGeometry
