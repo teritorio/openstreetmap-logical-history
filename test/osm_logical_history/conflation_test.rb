@@ -146,6 +146,8 @@ class TestConflation < Test::Unit::TestCase
     assert_equal(1.0, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
+      T.must(before[0]&.diameter),
+      T.must(after[0]&.diameter),
       @@demi_distance
     )&.first)
     assert_equal(
@@ -157,6 +159,8 @@ class TestConflation < Test::Unit::TestCase
     assert_equal(0.5, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
+      T.must(before[0]&.diameter),
+      T.must(after[0]&.diameter),
       @@demi_distance
     )&.first)
     assert_equal(
@@ -168,6 +172,8 @@ class TestConflation < Test::Unit::TestCase
     assert_equal(nil, Geom.geom_score(
       T.must(before[0]&.geos),
       T.must(after[0]&.geos),
+      T.must(before[0]&.diameter),
+      T.must(after[0]&.diameter),
       @@demi_distance
     )&.first)
   end

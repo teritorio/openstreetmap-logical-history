@@ -21,27 +21,14 @@ module OSMLogicalHistory
 
     sig {
       params(
-        geom: RGeo::Feature::Geometry,
-      ).returns(Float)
-    }
-    def self.geom_diameter(geom)
-      return 0.0 if geom.empty? || geom.dimension == 0
-
-      ring = geom.envelope.exterior_ring
-      ring.point_n(0).distance(ring.point_n(2))
-    end
-
-    sig {
-      params(
-        geom: RGeo::Feature::Geometry,
+        diam: Float,
         x_min: Float,
         y_min: Float,
         x_max: Float,
         y_max: Float,
       ).returns(Float)
     }
-    def self.buffer_size(geom, x_min, y_min, x_max, y_max)
-      diam = geom_diameter(geom)
+    def self.buffer_size(diam, x_min, y_min, x_max, y_max)
       if diam < x_min
         y_min
       elsif diam > x_max
@@ -130,10 +117,12 @@ module OSMLogicalHistory
       params(
         r_geom_a: RGeo::Feature::Geometry,
         r_geom_b: RGeo::Feature::Geometry,
+        diameter_a: Float,
+        diameter_b: Float,
         demi_distance: Float,
       ).returns(T.nilable(DistanceMeusure))
     }
-    def self.geom_score(r_geom_a, r_geom_b, demi_distance)
+    def self.geom_score(r_geom_a, r_geom_b, diameter_a, diameter_b, demi_distance)
       return [0.0, nil, nil, 'same'] if r_geom_a.equals?(r_geom_b)
 
       if r_geom_a.dimension == 0 && r_geom_b.dimension == 0
@@ -161,8 +150,8 @@ module OSMLogicalHistory
       if !intersection.empty? && intersection.dimension == r_geom_a.dimension && intersection.dimension == r_geom_b.dimension
         # Compute: 1 - intersection / union
         # Compute buffered symetrical difference
-        buffer_size_b = buffer_size(r_geom_b, 3.0, 3.0, 40.0, 20.0)
-        buffer_size_a = buffer_size(r_geom_a, 3.0, 3.0, 40.0, 20.0)
+        buffer_size_b = buffer_size(diameter_b, 3.0, 3.0, 40.0, 20.0)
+        buffer_size_a = buffer_size(diameter_a, 3.0, 3.0, 40.0, 20.0)
         a_over_b = T.let(r_geom_a - r_geom_b.buffer(buffer_size_b), RGeo::Feature::Geometry)
         b_over_a = T.let(r_geom_b - r_geom_a.buffer(buffer_size_a), RGeo::Feature::Geometry)
 

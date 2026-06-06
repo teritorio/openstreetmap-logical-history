@@ -72,6 +72,9 @@ module OSMLogicalHistory
 
       @geos_internal = T.let(nil, T.nilable(RGeo::Feature::Geometry))
       @has_geos = T.let(false, T::Boolean)
+
+      @diameter = T.let(nil, T.nilable(Float))
+      @has_diameter = T.let(false, T::Boolean)
     end
 
     sig { returns(T.nilable(RGeo::Feature::Geometry)) }
@@ -92,6 +95,34 @@ module OSMLogicalHistory
       @has_geos = true
       @geos_internal = value
     end
+
+    sig { returns(T.nilable(Float)) }
+    def diameter
+      if @has_diameter
+        @diameter
+      else
+        @has_diameter = true
+        g = T.unsafe(geos)
+        return @diameter = nil if g.nil?
+        return @diameter = 0.0 if g.empty? || g.dimension == 0
+
+        ring = g.envelope.exterior_ring
+        @diameter = ring.point_n(0).distance(ring.point_n(2))
+      end
+    end
+
+    sig {
+      params(
+        geom: RGeo::Feature::Geometry,
+      ).returns(Float)
+    }
+    def self.geom_diameter(geom)
+      return 0.0 if geom.empty? || geom.dimension == 0
+
+      ring = geom.envelope.exterior_ring
+      ring.point_n(0).distance(ring.point_n(2))
+    end
+
 
     sig { overridable.params(other: OSMObject).returns(T::Boolean) }
     def eql?(other)

@@ -150,10 +150,10 @@ module OSMLogicalHistory
         return dist if dist != 0
 
         # Match smaller first
-        dist = (Geom.geom_diameter(T.must(before.geos)) <=> Geom.geom_diameter(T.must(other.before.geos)))
+        dist = T.must(before.diameter) <=> T.must(other.before.diameter)
         return dist if dist != 0
 
-        dist = (Geom.geom_diameter(T.must(after.geos)) <=> Geom.geom_diameter(T.must(other.after.geos)))
+        dist = T.must(after.diameter) <=> T.must(other.after.diameter)
         return dist if dist != 0
 
         [before, after] <=> [other.before, other.after]
@@ -195,7 +195,7 @@ module OSMLogicalHistory
               # Geom distance does not matter on 1x1 matrix, fast return
               [0.0, nil, nil, '1x1 matrix']
             else
-              OSMLogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), demi_distance)
+              OSMLogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), T.must(b.diameter), T.must(a.diameter), demi_distance)
             end
           )
           next if g_dist.nil?

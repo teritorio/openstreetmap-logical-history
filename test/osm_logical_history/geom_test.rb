@@ -49,7 +49,7 @@ class TestGeom < Test::Unit::TestCase
       project: true,
       factory: projection,
     )
-    d = Geom.geom_score(before, after, demi_distance)
+    d = Geom.geom_score(before, after, 0.0, 0.0, demi_distance)
 
     assert(T.must(d&.first) < 0.5)
     assert(T.must(d&.first) > 0.0)
