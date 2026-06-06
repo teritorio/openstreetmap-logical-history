@@ -143,12 +143,16 @@ module OSMLogicalHistory
       end
 
       if r_geom_a.geometry_type == RGeo::Feature::LineString && r_geom_b.geometry_type == RGeo::Feature::LineString
-        # Snap lines to each other to avoid small misalignement
-        r_geom_a, r_geom_b = LineStringSnapper.snap(
-          T.cast(r_geom_a, RGeo::Feature::LineString),
-          T.cast(r_geom_b, RGeo::Feature::LineString),
-          1.0 # m
-        )
+        distance = r_geom_a.distance(r_geom_b)
+        snap_distance = 1.0 # m
+        if distance <= snap_distance
+          # Snap lines to each other to avoid small misalignement
+          r_geom_a, r_geom_b = LineStringSnapper.snap(
+            T.cast(r_geom_a, RGeo::Feature::LineString),
+            T.cast(r_geom_b, RGeo::Feature::LineString),
+            snap_distance
+          )
+        end
       end
 
       intersection = r_geom_a.intersection(r_geom_b)
