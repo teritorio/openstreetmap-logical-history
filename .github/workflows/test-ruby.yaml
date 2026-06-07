@@ -27,6 +27,19 @@ jobs:
           bundler-cache: true
           cache-version: 1
 
+      # - name: Setup Tapioca cache
+      #   id: cache-tapioca
+      #   uses: actions/cache@v5
+      #   with:
+      #     path: sorbet
+      #     key: ${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+
+      # - name: Init Tapioca
+      #   if: steps.cache-tapioca.outputs.cache-hit != 'true'
+      #   run: |
+      #     bundle exec tapioca init && \
+      #     bundle exec srb rbi suggest-typed
+
       - name: Build missing levenshtein
         run: cd /home/runner/work/openstreetmap-logical-history/openstreetmap-logical-history/vendor/bundle/ruby/3.2.0/gems/levenshtein-ffi-1.1.0/ext/levenshtein && make
 
@@ -35,9 +48,7 @@ jobs:
 
       # - name: Run typecheck
       #   run: |
-      #     bundle exec tapioca init && \
       #     bundle exec rake rails_rbi:routes && \
-      #     bundle exec srb rbi suggest-typed && \
       #     bundle exec srb typecheck -q
       #     # bundle exec tapioca dsl && \
 
