@@ -96,7 +96,7 @@ module OSMLogicalHistory
 
       if r_geom_a.intersection(r_geom_b).dimension < r_geom_a.dimension
         # Excact distance give a lower dimension geom, use buffered distance
-        return [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? a_over_b : nil, 'intersection over union, distance to lower dimension']
+        return [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? b_over_a : nil, 'intersection over union, distance to lower dimension']
       end
 
       exact_a_over_b = r_geom_a - r_geom_b
@@ -109,7 +109,7 @@ module OSMLogicalHistory
         exact_b_over_a = concat_multilinestring(exact_b_over_a)
         [exact_distance, exact_a_over_b.empty? ? nil : exact_a_over_b, exact_b_over_a.empty? ? nil : exact_b_over_a, 'intersection over union, exact intersection']
       else
-        [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? b_over_a : nil, 'intersection over union, distance buffered intersection']
+        [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'intersection over union, distance buffered intersection']
       end
     end
 
