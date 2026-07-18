@@ -56,12 +56,12 @@ module OSMLogicalHistory
     def self.key_of_same_class(key, value_a, value_b)
       !value_a.nil? && !value_b.nil? &&
         MAIN_TAGS_CLASS_OF_VALUES.key?(key) && (
-        MAIN_TAGS_CLASS_OF_VALUES[key].nil? ||
-        (
-          (T.must(MAIN_TAGS_CLASS_OF_VALUES[key]).include?(value_a)) &&
-          (T.must(MAIN_TAGS_CLASS_OF_VALUES[key]).include?(value_b))
+          MAIN_TAGS_CLASS_OF_VALUES[key].nil? ||
+          (
+            (T.must(MAIN_TAGS_CLASS_OF_VALUES[key]).include?(value_a)) &&
+            (T.must(MAIN_TAGS_CLASS_OF_VALUES[key]).include?(value_b))
+          )
         )
-      )
     end
 
     sig {
