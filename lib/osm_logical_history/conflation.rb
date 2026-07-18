@@ -498,7 +498,7 @@ module OSMLogicalHistory
       paired = conflate(befores, afters, demi_distance)
       paired = conflate_merge_deleted_created(paired)
 
-      paired.collect{ |c|
+      paired.each{ |c|
         if !c.before.nil? && !c.after.nil? && !T.unsafe(c.before&.geos).nil? && !T.unsafe(c.after&.geos).nil?
           after_geos = T.must(c.after&.geos)
           before_geos = T.must(c.before&.geos)
@@ -514,8 +514,9 @@ module OSMLogicalHistory
             end
           end
         end
-        c
       }
+
+      paired
     end
 
     sig {
