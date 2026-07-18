@@ -19,6 +19,19 @@ module DistanceHausdorff
 
     return 0.0 if points1.size >= 16 || points2.size >= 16
 
+    [
+      directed_distance(points1, points2),
+      directed_distance(points2, points1),
+    ].max
+  end
+
+  sig {
+    params(
+      points1: T::Array[RGeo::Feature::Point],
+      points2: T::Array[RGeo::Feature::Point],
+    ).returns(Float)
+  }
+  def self.directed_distance(points1, points2)
     max = 0.0
     points1.each { |pp1|
       min = Float::INFINITY

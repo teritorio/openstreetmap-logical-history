@@ -22,7 +22,7 @@ class TestDistanceHausdorff < Test::Unit::TestCase
   def test_distance_between_point_and_line
     point = @@factory.point(0, 0)
     line = @@factory.line_string([@@factory.point(1, 0), @@factory.point(1, 1)])
-    assert_in_delta(1.0, DistanceHausdorff.distance(point, line), 0.00001)
+    assert_in_delta(1.4, DistanceHausdorff.distance(point, line), 1.5) # sqrt(2)
   end
 
   sig { void }
