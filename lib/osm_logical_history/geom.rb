@@ -182,19 +182,16 @@ module OSMLogicalHistory
           dim_b = b_over_a.dimension
           union = r_geom_a.union(r_geom_b)
           dim_union = union.dimension
-          if dim_a == 0 && dim_b == 0 && dim_union == 0
-            # Points
-            raise 'Non equal intersecting points, should never happen.'
-          elsif dim_a == 1 && dim_b == 1 && dim_union == 1
+          raise 'Diff dimension geom should not happen.' if dim_a != dim_b || dim_a != dim_union
+          raise 'Non equal intersecting points, should never happen.' if dim_union == 0 # Points
+
+          if dim_union == 1
             # Lines
             _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, r_geom_a_buffer, r_geom_b_buffer, union) { |geos| T.unsafe(geos).length }
-            dm
-          elsif dim_a == 2 && dim_b == 2 && dim_union == 2
+          else # dim_union == 2
             _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, r_geom_a_buffer, r_geom_b_buffer, union) { |geos| T.unsafe(geos).area }
-            dm
-          else
-            raise 'Diff dimension geom should not happen.'
           end
+          dm
         end
       else
         # Else, use real distance + bias because no intersection
