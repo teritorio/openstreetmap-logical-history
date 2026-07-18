@@ -89,14 +89,14 @@ module OSMLogicalHistory
         b_over_a: RGeo::Feature::Geometry,
         union: RGeo::Feature::Geometry,
         _block: T.proc.params(arg0: RGeo::Feature::Geometry).returns(Float),
-      ).returns(DistanceMeusure)
+      ).returns([T::Boolean, DistanceMeusure])
     }
-    def self.exact_or_buffered_size_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union, &_block)
+    def self.exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union, &_block)
       buffered_distance = (yield(a_over_b) + yield(b_over_a)) / yield(union) / 2
 
       if r_geom_a.intersection(r_geom_b).dimension < r_geom_a.dimension
         # Excact distance give a lower dimension geom, use buffered distance
-        return [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'intersection over union, distance to lower dimension']
+        return [true, [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'buffered intersection over union, distance to lower dimension']]
       end
 
       exact_a_over_b = r_geom_a - r_geom_b
@@ -107,9 +107,9 @@ module OSMLogicalHistory
       if exact_distance / buffered_distance > 0.6
         exact_a_over_b = concat_multilinestring(exact_a_over_b)
         exact_b_over_a = concat_multilinestring(exact_b_over_a)
-        [exact_distance, exact_a_over_b.empty? ? nil : exact_a_over_b, exact_b_over_a.empty? ? nil : exact_b_over_a, 'intersection over union, exact intersection']
+        [false, [exact_distance, exact_a_over_b.empty? ? nil : exact_a_over_b, exact_b_over_a.empty? ? nil : exact_b_over_a, 'exact intersection over union']]
       else
-        [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'intersection over union, distance buffered intersection']
+        [true, [buffered_distance, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'buffered intersection over union, distance intersection']]
       end
     end
 
@@ -161,10 +161,10 @@ module OSMLogicalHistory
         elsif a_over_b.empty? || b_over_a.empty?
           # One subpart of the other
           union = r_geom_a.union(r_geom_b)
-          parts = exact_or_buffered_size_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos|
+          buffered, parts = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos|
             intersection.dimension == 1 ? T.unsafe(geos).length : T.unsafe(geos).area
           }
-          [0.0, parts[1], parts[2], 'buffered subpart']
+          [0.0, parts[1], parts[2], buffered ? 'buffered subpart' : 'exact subpart']
         else
           dim_a = a_over_b.dimension
           dim_b = b_over_a.dimension
@@ -175,9 +175,11 @@ module OSMLogicalHistory
             raise 'Non equal intersecting points, should never happen.'
           elsif dim_a == 1 && dim_b == 1 && dim_union == 1
             # Lines
-            exact_or_buffered_size_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos| T.unsafe(geos).length }
+            _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos| T.unsafe(geos).length }
+            dm
           elsif dim_a == 2 && dim_b == 2 && dim_union == 2
-            exact_or_buffered_size_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos| T.unsafe(geos).area }
+            _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, union) { |geos| T.unsafe(geos).area }
+            dm
           else
             raise 'Diff dimension geom should not happen.'
           end
