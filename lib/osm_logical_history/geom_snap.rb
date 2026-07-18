@@ -151,23 +151,23 @@ module OSMLogicalHistory
 
       sig {
         params(
-          x: Float,
-          y: Float
+          p_x: Float,
+          p_y: Float
         ).returns([Integer, Integer])
       }
-      def cell_for(x, y)
-        [(x / @cell_size).floor, (y / @cell_size).floor]
+      def cell_for(p_x, p_y)
+        [(p_x / @cell_size).floor, (p_y / @cell_size).floor]
       end
 
       sig {
         params(
-          p1: RGeo::Feature::Point,
-          p2: RGeo::Feature::Point
+          pp1: RGeo::Feature::Point,
+          pp2: RGeo::Feature::Point
         ).returns(T::Array[[Integer, Integer]])
       }
-      def cells_for_segment(p1, p2)
-        x0, y0 = cell_for(p1.x, p1.y)
-        x1, y1 = cell_for(p2.x, p2.y)
+      def cells_for_segment(pp1, pp2)
+        x0, y0 = cell_for(pp1.x, pp1.y)
+        x1, y1 = cell_for(pp2.x, pp2.y)
 
         nx = (x1 - x0).abs
         ny = (y1 - y0).abs
