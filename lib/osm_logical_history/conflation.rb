@@ -7,7 +7,6 @@ require 'sorted_set'
 require 'rgl/implicit'
 require 'rgl/connected_components'
 require 'active_support/core_ext/enumerable'
-require_relative 'distance_hausdorff'
 require_relative 'refs'
 require_relative 'tags'
 require_relative 'geom'
@@ -190,10 +189,10 @@ module OSMLogicalHistory
 
           g_dist = (
             if b.geos == a.geos
-              [0.0, nil, nil, 'same geom']
+              [0.0, 0.0, nil, nil, 'same geom']
             elsif (b.geos&.dimension == 2 && a.geos&.dimension == 2 && befores.size == 1 && afters.size == 1)
               # Geom distance does not matter on 1x1 matrix, fast return
-              [0.0, nil, nil, '1x1 matrix']
+              [0.0, 0.0, nil, nil, '1x1 matrix']
             else
               OSMLogicalHistory::Geom.geom_score(T.must(b.geos), T.must(a.geos), T.must(b.diameter), T.must(a.diameter), demi_distance)
             end
@@ -264,9 +263,9 @@ module OSMLogicalHistory
       # Add the remaining geom parts to the matrix
       new_befores = T.let(Set.new, T::Set[OSMObjectT])
       new_afters = T.let(Set.new, T::Set[OSMObjectT])
-      if !T.unsafe(cell.dist_geom[1]).nil? || !T.unsafe(cell.dist_geom[2]).nil?
-        new_befores += remaining_geom_parts(cell.before, T.must(cell.dist_geom[1])) if !T.unsafe(cell.dist_geom[1]).nil?
-        new_afters += remaining_geom_parts(cell.after, T.must(cell.dist_geom[2])) if !T.unsafe(cell.dist_geom[2]).nil?
+      if !T.unsafe(cell.dist_geom[2]).nil? || !T.unsafe(cell.dist_geom[3]).nil?
+        new_befores += remaining_geom_parts(cell.before, T.must(cell.dist_geom[2])) if !T.unsafe(cell.dist_geom[2]).nil?
+        new_afters += remaining_geom_parts(cell.after, T.must(cell.dist_geom[3])) if !T.unsafe(cell.dist_geom[3]).nil?
       elsif !cell.dist_tags[1].nil? || !cell.dist_tags[2].nil?
         new_befores += remaining_tags_parts(cell.before, T.must(cell.dist_tags[1])) if !cell.dist_tags[1].nil?
         new_afters += remaining_tags_parts(cell.after, T.must(cell.dist_tags[2])) if !cell.dist_tags[2].nil?
@@ -307,7 +306,7 @@ module OSMLogicalHistory
           after: cell.after,
           conflation_reason: ConflationReason.new(
             tags: { score: cell.dist_tags[0], reason: cell.dist_tags[3] }.compact,
-            geom: { score: cell.dist_geom[0], reason: cell.dist_geom[3] }.compact,
+            geom: { score: cell.dist_geom[0], reason: cell.dist_geom[4], max_distance: cell.dist_geom[1] }.compact,
             conflate: 'better score match'
           )
         )
@@ -506,12 +505,10 @@ module OSMLogicalHistory
           if geom_distance > 0
             c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ min_distance: geom_distance })
           end
-          if before_geos.dimension > 0 && after_geos.dimension > 0
-            # Only if it is not points, else it the same as min_distance
-            geom_distance = DistanceHausdorff.distance(before_geos, after_geos)
-            if geom_distance > 0
-              c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ max_distance: geom_distance })
-            end
+          # Only if it is not points, else it the same as min_distance
+          if before_geos.dimension > 0 && after_geos.dimension > 0 && (geom_distance > 0)
+            max_distance = c.conflation_reason.geom&.dig(:max_distance)
+            c.conflation_reason.geom = (c.conflation_reason.geom || {}).merge({ max_distance: max_distance })
           end
         end
       }

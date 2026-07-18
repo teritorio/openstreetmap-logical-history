@@ -378,12 +378,13 @@ class TestConflation < Test::Unit::TestCase
       build_object(id: 3, geojson_geometry: '{"type":"LineString","coordinates":[[0,100],[0,200]]}', tags: tags),
     ]
 
-    conflations = Conflation.new.conflate(before, after, @@demi_distance)
+    conflations = Conflation.new.conflate_with_simplification(before, after, @@demi_distance)
     assert_equal(3, conflations.size, conflations)
     assert_equal(
       [[before[0], after[0], after[0]], [before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) }.sort,
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
+    assert_equal([20.0, 0.0, nil], conflations.collect{ |c| c.conflation_reason.geom&.dig(:max_distance) })
   end
 
   sig { void }
