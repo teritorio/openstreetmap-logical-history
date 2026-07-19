@@ -384,7 +384,7 @@ class TestConflation < Test::Unit::TestCase
       [[before[0], after[0], after[0]], [before[0], after[0], after[1]], [before[0], after[0], after[2]]].collect{ |t| t.collect(&:id) }.sort,
       conflations.collect(&:to_a).collect{ |t| t.collect{ |k| k&.id } }.sort
     )
-    assert_equal([20.0, 0.0, nil], conflations.collect{ |c| c.conflation_reason.geom&.dig(:max_distance) })
+    assert_equal([0.0, 0.0, nil], conflations.collect{ |c| c.conflation_reason.geom&.dig(:max_distance) })
   end
 
   sig { void }

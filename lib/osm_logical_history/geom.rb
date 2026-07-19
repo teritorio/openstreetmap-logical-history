@@ -45,6 +45,17 @@ module OSMLogicalHistory
       params(
         geom_a: RGeo::Feature::Geometry,
         geom_b: RGeo::Feature::Geometry,
+      ).returns(Float)
+    }
+    def self.hausdorff_distance(geom_a, geom_b)
+      d = DistanceHausdorff.distance(geom_a, geom_b)
+      d == Float::INFINITY ? 0.0 : d
+    end
+
+    sig {
+      params(
+        geom_a: RGeo::Feature::Geometry,
+        geom_b: RGeo::Feature::Geometry,
         demi_distance: Float,
       ).returns(Float)
     }
@@ -87,38 +98,42 @@ module OSMLogicalHistory
       params(
         r_geom_a: RGeo::Feature::Geometry,
         r_geom_b: RGeo::Feature::Geometry,
-        a_over_b: RGeo::Feature::Geometry,
-        b_over_a: RGeo::Feature::Geometry,
+        a_without_b: RGeo::Feature::Geometry,
+        b_without_a: RGeo::Feature::Geometry,
         r_geom_a_buffer: RGeo::Feature::Geometry,
         r_geom_b_buffer: RGeo::Feature::Geometry,
-        union: RGeo::Feature::Geometry,
         _block: T.proc.params(arg0: RGeo::Feature::Geometry).returns(Float),
       ).returns([T::Boolean, DistanceMeusure])
     }
-    def self.exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, r_geom_a_buffer, r_geom_b_buffer, union, &_block)
-      buffered_distance = (yield(a_over_b) + yield(b_over_a)) / yield(union) / 2
-
-      distance_hausdorff = DistanceHausdorff.distance(
-        r_geom_b_buffer.intersection(r_geom_a),
-        r_geom_a_buffer.intersection(r_geom_b)
-      )
+    def self.exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_without_b, b_without_a, r_geom_a_buffer, r_geom_b_buffer, &_block)
+      union_size = yield(r_geom_a.union(r_geom_b))
+      buffered_distance = (yield(a_without_b) + yield(b_without_a)) / union_size
 
       if r_geom_a.intersection(r_geom_b).dimension < r_geom_a.dimension
         # Excact distance give a lower dimension geom, use buffered distance
-        return [true, [buffered_distance, distance_hausdorff, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'buffered intersection over union, distance to lower dimension']]
+        distance_hausdorff = hausdorff_distance(
+          r_geom_a.intersection(r_geom_b_buffer),
+          r_geom_b.intersection(r_geom_a_buffer)
+        )
+        return [true, [buffered_distance, distance_hausdorff, a_without_b.empty? ? nil : a_without_b, b_without_a.empty? ? nil : b_without_a, 'buffered intersection over union, distance to lower dimension']]
       end
 
-      exact_a_over_b = r_geom_a - r_geom_b
-      exact_b_over_a = r_geom_b - r_geom_a
-      exact_distance = (yield(exact_a_over_b) + yield(exact_b_over_a)) / yield(union) / 2
+      exact_a_without_b = r_geom_a - r_geom_b
+      exact_b_without_a = r_geom_b - r_geom_a
+      exact_distance = (yield(exact_a_without_b) + yield(exact_b_without_a)) / union_size
 
       # Prefer exact distance if it's more than 60% of the buffered distance
-      if exact_distance / buffered_distance > 0.6
-        exact_a_over_b = concat_multilinestring(exact_a_over_b)
-        exact_b_over_a = concat_multilinestring(exact_b_over_a)
-        [false, [exact_distance, distance_hausdorff, exact_a_over_b.empty? ? nil : exact_a_over_b, exact_b_over_a.empty? ? nil : exact_b_over_a, 'exact intersection over union']]
+      if exact_distance * 0.6 < buffered_distance
+        exact_a_without_b = concat_multilinestring(exact_a_without_b)
+        exact_b_without_a = concat_multilinestring(exact_b_without_a)
+        distance_hausdorff = hausdorff_distance(exact_b_without_a, exact_a_without_b)
+        [false, [exact_distance, distance_hausdorff, exact_a_without_b.empty? ? nil : exact_a_without_b, exact_b_without_a.empty? ? nil : exact_b_without_a, 'exact intersection over union']]
       else
-        [true, [buffered_distance, distance_hausdorff, a_over_b.empty? ? nil : a_over_b, b_over_a.empty? ? nil : b_over_a, 'buffered intersection over union, distance intersection']]
+        distance_hausdorff = hausdorff_distance(
+          r_geom_a.intersection(r_geom_b_buffer),
+          r_geom_b.intersection(r_geom_a_buffer)
+        )
+        [true, [buffered_distance, distance_hausdorff, a_without_b.empty? ? nil : a_without_b, b_without_a.empty? ? nil : b_without_a, 'buffered intersection over union, distance intersection']]
       end
     end
 
@@ -163,33 +178,30 @@ module OSMLogicalHistory
         buffer_size_a = buffer_size(diameter_a, 3.0, 3.0, 40.0, 20.0)
         r_geom_b_buffer = r_geom_b.buffer(buffer_size_b)
         r_geom_a_buffer = r_geom_a.buffer(buffer_size_a)
-        a_over_b = T.let(r_geom_a - r_geom_b_buffer, RGeo::Feature::Geometry)
-        b_over_a = T.let(r_geom_b - r_geom_a_buffer, RGeo::Feature::Geometry)
+        a_without_b = T.let(r_geom_a - r_geom_b_buffer, RGeo::Feature::Geometry)
+        b_without_a = T.let(r_geom_b - r_geom_a_buffer, RGeo::Feature::Geometry)
 
-        if a_over_b.empty? && b_over_a.empty?
+        if a_without_b.empty? && b_without_a.empty?
           # Equality
-          distance_hausdorff = DistanceHausdorff.distance(r_geom_a, r_geom_b)
+          distance_hausdorff = hausdorff_distance(r_geom_a, r_geom_b)
           [0.0, distance_hausdorff, nil, nil, 'symetrical buffered inclusion']
-        elsif a_over_b.empty? || b_over_a.empty?
+        elsif a_without_b.empty? || b_without_a.empty?
           # One subpart of the other
-          union = r_geom_a.union(r_geom_b)
-          buffered, parts = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, r_geom_a_buffer, r_geom_b_buffer, union) { |geos|
+          buffered, parts = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_without_b, b_without_a, r_geom_a_buffer, r_geom_b_buffer) { |geos|
             intersection.dimension == 1 ? T.unsafe(geos).length : T.unsafe(geos).area
           }
           [0.0, parts[1], parts[2], parts[3], buffered ? 'buffered subpart' : 'exact subpart']
         else
-          dim_a = a_over_b.dimension
-          dim_b = b_over_a.dimension
-          union = r_geom_a.union(r_geom_b)
-          dim_union = union.dimension
-          raise 'Diff dimension geom should not happen.' if dim_a != dim_b || dim_a != dim_union
-          raise 'Non equal intersecting points, should never happen.' if dim_union == 0 # Points
+          dim_a = a_without_b.dimension
+          dim_b = b_without_a.dimension
+          raise 'Diff dimension geom should not happen.' if dim_a != dim_b
+          raise 'Non equal intersecting points, should never happen.' if dim_a == 0 # Points
 
-          if dim_union == 1
+          if dim_a == 1
             # Lines
-            _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, r_geom_a_buffer, r_geom_b_buffer, union) { |geos| T.unsafe(geos).length }
-          else # dim_union == 2
-            _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_over_b, b_over_a, r_geom_a_buffer, r_geom_b_buffer, union) { |geos| T.unsafe(geos).area }
+            _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_without_b, b_without_a, r_geom_a_buffer, r_geom_b_buffer) { |geos| T.unsafe(geos).length }
+          else # dim_a == 2
+            _buffered, dm = exact_or_buffered_sym_diff_over_union(r_geom_a, r_geom_b, a_without_b, b_without_a, r_geom_a_buffer, r_geom_b_buffer) { |geos| T.unsafe(geos).area }
           end
           dm
         end
@@ -199,7 +211,7 @@ module OSMLogicalHistory
         return nil if d > 0.5
 
         d = 0.5 + d
-        distance_hausdorff = DistanceHausdorff.distance(r_geom_a, r_geom_b)
+        distance_hausdorff = hausdorff_distance(r_geom_a, r_geom_b)
         [d, distance_hausdorff, nil, nil, 'log euclidean distance + bias']
       end
     rescue RGeo::Error::InvalidGeometry
