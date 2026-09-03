@@ -18,6 +18,7 @@ jobs:
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: libgeos-dev libproj-dev
+          version: 2
 
       - uses: actions/checkout@v3
       - name: Set up Ruby
@@ -41,7 +42,7 @@ jobs:
       #     bundle exec srb rbi suggest-typed
 
       - name: Build missing levenshtein
-        run: cd /home/runner/work/openstreetmap-logical-history/openstreetmap-logical-history/vendor/bundle/ruby/3.2.0/gems/levenshtein-ffi-1.1.0/ext/levenshtein && make
+        run: cd /home/runner/work/openstreetmap-logical-history/openstreetmap-logical-history/vendor/bundle/ruby/3.4.0/gems/levenshtein-ffi-1.1.0/ext/levenshtein && make
 
       - name: Run rubocop
         run: bundle exec rubocop --parallel -c .rubocop.yml
