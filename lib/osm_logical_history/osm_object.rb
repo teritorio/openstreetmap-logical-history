@@ -35,6 +35,9 @@ module OSMLogicalHistory
     sig { returns(Integer) }
     attr_reader :version
 
+    sig { returns(T.nilable(Integer)) }
+    attr_reader :uid
+
     sig { returns(T.nilable(String)) }
     attr_reader :username
 
@@ -53,12 +56,13 @@ module OSMLogicalHistory
         deleted: T::Boolean,
         members: T.nilable(T::Array[Integer]),
         version: Integer,
+        uid: T.nilable(Integer),
         username: T.nilable(String),
         created: String,
         tags: T::Hash[String, String]
       ).void
     }
-    def initialize(objtype:, id:, geojson_geometry:, geos_factory:, deleted:, members:, version:, username:, created:, tags:)
+    def initialize(objtype:, id:, geojson_geometry:, geos_factory:, deleted:, members:, version:, uid:, username:, created:, tags:)
       @objtype = objtype
       @id = id
       @geojson_geometry = geojson_geometry
@@ -66,6 +70,7 @@ module OSMLogicalHistory
       @deleted = deleted
       @members = members
       @version = version
+      @uid = uid
       @username = username
       @created = created
       @tags = tags

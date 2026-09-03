@@ -27,6 +27,7 @@ class OSMSource
           members: members,
           version: version,
           # changesets: changesets,
+          uid: uid,
           username: username,
           created: created,
           tags: tags,

@@ -171,6 +171,7 @@ class Overpass < OSMSource
         deleted: element['deleted'] || false,
         members: nil, ##################### TODO
         version: element['version'].to_i,
+        uid: element['uid'].to_i,
         username: element['user'],
         created: element['timestamp'],
         tags: element['tag'].nil? ? {} : (element['tag'].is_a?(Array) ? element['tag'] : [element['tag']]).to_h{ |p| [p['k'], p['v']] }

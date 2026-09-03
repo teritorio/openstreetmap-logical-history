@@ -77,7 +77,7 @@ Metrics/ClassLength:
   Max: 1000
 
 Metrics/ParameterLists:
-  Max: 10
+  Max: 11
 
 Metrics/BlockNesting:
   Max: 5

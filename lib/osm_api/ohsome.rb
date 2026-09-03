@@ -97,6 +97,7 @@ class Ohsome < OSMSource
         deleted: f['properties']['@deletion'] || false,
         members: nil, ##################### TODO
         version: f['properties']['@version'],
+        uid: nil, # TODO
         username: nil, # TODO
         created: f['properties']['@timestamp'] || f['properties']['@lastEdit'],
         tags: f['properties'].select{ |k, _v| !k.start_with?('@') }.to_h

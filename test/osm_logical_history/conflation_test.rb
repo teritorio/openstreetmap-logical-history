@@ -45,6 +45,7 @@ class TestConflation < Test::Unit::TestCase
         members: nil,
         version: version,
         # changesets: nil,
+        uid: 1,
         username: 'bob',
         created: 'today',
         tags: tags,
