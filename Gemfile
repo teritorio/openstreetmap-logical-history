@@ -20,6 +20,7 @@ group :server, optional: true do
   gem 'hanami-api'
   gem 'moneta', '~> 1.6'
   gem 'puma', '~> 6.0'
+  gem 'rackup', '~> 2.3'
   gem 'sentry-ruby', '~> 5.27'
 end
 
