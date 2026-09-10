@@ -101,8 +101,8 @@ class App < Hanami::API
     [
       200,
       {
-        'Content-Type' => 'application/geo+json',
-        'Access-Control-Allow-Origin' => '*',
+        'content-type' => 'application/geo+json',
+        'access-control-allow-origin' => '*',
       },
       body
     ]
@@ -111,7 +111,15 @@ class App < Hanami::API
     puts e.backtrace
     [
       400,
-      { 'Access-Control-Allow-Origin' => '*' },
+      { 'access-control-allow-origin' => '*' },
+      e.message
+    ]
+  rescue StandardError => e
+    puts e.message
+    puts e.backtrace
+    [
+      500,
+      { 'access-control-allow-origin' => '*' },
       e.message
     ]
   end
