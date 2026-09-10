@@ -66,7 +66,7 @@ class TestGeom < Test::Unit::TestCase
     assert_equal(true, buffered)
     opp = RGeo::GeoJSON.decode({ 'type' => 'MultiLineString', 'coordinates' => [[[-100, 0], [-20, 0]], [[20, 0], [100, 0]]] }, geo_factory: geo_factory)
     odd = RGeo::GeoJSON.decode({ 'type' => 'MultiLineString', 'coordinates' => [[[0, -100], [0, -20]], [[0, 20], [0, 100]]] }, geo_factory: geo_factory)
-    assert_equal([28.284271247461902, opp.to_s, odd.to_s], d[1..1] + d[2..3].collect(&:to_s))
+    assert_equal([20.0, opp.to_s, odd.to_s], d[1..1] + d[2..3].collect(&:to_s))
   end
 
   sig { void }
@@ -111,5 +111,15 @@ class TestGeom < Test::Unit::TestCase
 
     assert(T.must(d&.first) < 0.5)
     assert(T.must(d&.first) > 0.0)
+  end
+
+  def test_geom_add_inline_node
+    geo_factory = RGeo::Geos.factory(srid: 4326)
+
+    before = RGeo::GeoJSON.decode({ 'type' => 'LineString', 'coordinates' => [[0, 0], [0, 200]] }, geo_factory: geo_factory)
+    after = RGeo::GeoJSON.decode({ 'type' => 'LineString', 'coordinates' => [[0, 0], [10, 100], [0, 200]] }, geo_factory: geo_factory)
+    d = Geom.geom_score(before, after, 0.0, 0.0, 20.0)
+
+    assert_equal([0.5, 10.0, nil, nil, 'log euclidean distance + bias'], d)
   end
 end
