@@ -58,7 +58,7 @@ class TestConflationReal < Test::Unit::TestCase
         <tag k="addr:street" v="Calle Artearraga"/>
         <tag k="building" v="house"/>
       </way>
-      </action>
+    </action>
     </osm>
     '
 
