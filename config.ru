@@ -62,6 +62,7 @@ class App < Hanami::API
       params[:bbox] = '-1.4865185506147705,43.57582751611194,-1.4857594854635559,43.57668833005737' # Ondres plage
       params[:date_start] = '2023-08-01T00:00:00Z' # format ISO 8601
       params[:date_end] = '2023-09-30T00:00:00Z' # format ISO 8601
+      params[:include_relation_type_route] = 'false'
     end
 
     if params[:bbox].empty? || params[:date_start].empty?
@@ -84,13 +85,15 @@ class App < Hanami::API
       date_end = n.iso8601
     end
 
+    include_relation_type_route = params[:include_relation_type_route] == 'true'
+
     cache_key = [bbox, selector, date_start, date_end].join('/')
     body = cache.load(cache_key)
     if body.nil?
       lon = (bbox[0] + bbox[2]) / 2.0
       lat = (bbox[1] + bbox[3]) / 2.0
       srid = App.best_utm_zone(lon, lat)
-      objects_links_groups = remote_api.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+      objects_links_groups = remote_api.struct(bbox, selector, date_start, date_end, include_relation_type_route, srid, demi_distance)
 
       Moneta.new(:File, dir: 'moneta')
       body = remote_api.to_geojson(objects_links_groups, bbox).to_json

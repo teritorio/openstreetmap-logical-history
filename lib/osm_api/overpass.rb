@@ -18,14 +18,17 @@ class Overpass < OSMSource
       bbox: [Float, Float, Float, Float],
       selector: String,
       date_start: String,
-      date_end: String
+      date_end: String,
+      include_relation_type_route: T::Boolean,
     ).returns(T.nilable(String))
   }
-  def self.fetch_osm_at_date(bbox, selector, date_start, date_end)
+  def self.fetch_osm_at_date(bbox, selector, date_start, date_end, include_relation_type_route)
     check_params!(bbox, selector, date_start, date_end)
 
     overpass_url = 'https://overpass-api.de/api/interpreter'
     bbox = bbox.each_slice(2).collect(&:reverse).flatten.join(',')
+
+    selector_relation = include_relation_type_route ? selector : "#{selector}[type!=route]"
 
     overpass_query = <<-QUERY
     [timeout:120][adiff:"#{date_start}","#{date_end}"];
@@ -34,7 +37,7 @@ class Overpass < OSMSource
       way#{selector}(#{bbox});
     );
     out meta geom;
-    relation#{selector}(#{bbox});
+    relation#{selector_relation}(#{bbox});
     out meta geom(#{bbox});
     QUERY
     puts [overpass_url, overpass_query]
@@ -185,6 +188,7 @@ class Overpass < OSMSource
       selector: String,
       date_start: String,
       date_end: String,
+      include_relation_type_route: T::Boolean,
       srid: Integer,
       demi_distance: Float
     ).returns(T::Array[[
@@ -192,8 +196,8 @@ class Overpass < OSMSource
       T::Array[T::Hash[Symbol, T.untyped]]
     ]])
   }
-  def self.struct(bbox, selector, date_start, date_end, srid, demi_distance)
-    xml = fetch_osm_at_date(bbox, selector, date_start, date_end)
+  def self.struct(bbox, selector, date_start, date_end, include_relation_type_route, srid, demi_distance)
+    xml = fetch_osm_at_date(bbox, selector, date_start, date_end, include_relation_type_route)
     raise 'Empty response from Overpass API' if xml.nil? || xml.empty?
 
     data_start, data_end = parse_xml(xml)

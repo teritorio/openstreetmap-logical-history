@@ -20,9 +20,10 @@ class Ohsome < OSMSource
       bbox: [Float, Float, Float, Float],
       _selector: String,
       dates: T::Array[String],
+      _include_relation_type_route: T::Boolean,
     ).returns(String)
   }
-  def self.fetch(path, bbox, _selector, dates)
+  def self.fetch(path, bbox, _selector, dates, _include_relation_type_route)
     ohsome_url = "https://api.ohsome.org/v1/#{path}/geometry"
     data = {
       bboxes: bbox.join(','),
@@ -51,13 +52,14 @@ class Ohsome < OSMSource
       bbox: [Float, Float, Float, Float],
       selector: String,
       date_start: String,
-      date_end: String
+      date_end: String,
+      include_relation_type_route: T::Boolean,
     ).returns([
         T::Array[T::Hash[String, T.untyped]],
         T::Array[T::Hash[String, T.untyped]]
       ])
   }
-  def self.fetch_osm_at_date(bbox, selector, date_start, date_end)
+  def self.fetch_osm_at_date(bbox, selector, date_start, date_end, include_relation_type_route)
     check_params!(bbox, selector, date_start, date_end)
 
     start, (changes, changes_ids) = Sync { |task|
@@ -67,7 +69,7 @@ class Ohsome < OSMSource
           JSON.parse(start)['features']
         },
         task.async {
-          changes = fetch('contributions/latest', bbox, selector, [date_start, date_end])
+          changes = fetch('contributions/latest', bbox, selector, [date_start, date_end], include_relation_type_route)
           changes = JSON.parse(changes)['features']
           changes_ids = changes.to_set{ |f| f['properties']['@osmId'] }
           [changes, changes_ids]
@@ -111,6 +113,7 @@ class Ohsome < OSMSource
       selector: String,
       date_start: String,
       date_end: String,
+      include_relation_type_route: T::Boolean,
       srid: Integer,
       demi_distance: Float
     ).returns(T::Array[[
@@ -118,8 +121,8 @@ class Ohsome < OSMSource
       T::Array[T::Hash[Symbol, T.untyped]]
     ]])
   }
-  def self.struct(bbox, selector, date_start, date_end, srid, demi_distance)
-    data_start, data_end = fetch_osm_at_date(bbox, selector, date_start, date_end)
+  def self.struct(bbox, selector, date_start, date_end, include_relation_type_route, srid, demi_distance)
+    data_start, data_end = fetch_osm_at_date(bbox, selector, date_start, date_end, include_relation_type_route)
 
     geos_factory = OSMLogicalHistory.build_geos_factory(srid)
 

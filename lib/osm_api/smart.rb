@@ -22,6 +22,7 @@ class Smart < OSMSource
       selector: String,
       date_start: String,
       date_end: String,
+      include_relation_type_route: T::Boolean,
       srid: Integer,
       demi_distance: Float
     ).returns(T::Array[[
@@ -29,10 +30,10 @@ class Smart < OSMSource
       T::Array[T::Hash[Symbol, T.untyped]]
     ]])
   }
-  def self.struct(bbox, selector, date_start, date_end, srid, demi_distance)
-    Ohsome.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+  def self.struct(bbox, selector, date_start, date_end, include_relation_type_route, srid, demi_distance)
+    Ohsome.struct(bbox, selector, date_start, date_end, include_relation_type_route, srid, demi_distance)
   rescue StandardError => e
     puts "Ohsome failed with #{e.message}, fallback to Overpass"
-    Overpass.struct(bbox, selector, date_start, date_end, srid, demi_distance)
+    Overpass.struct(bbox, selector, date_start, date_end, include_relation_type_route, srid, demi_distance)
   end
 end
