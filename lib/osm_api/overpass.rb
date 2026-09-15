@@ -30,15 +30,15 @@ class Overpass < OSMSource
 
     selector_relation = include_relation_type_route ? selector : "#{selector}[type!=route]"
 
-    overpass_query = <<-QUERY
-    [timeout:120][adiff:"#{date_start}","#{date_end}"];
-    (
-      node#{selector}(#{bbox});
-      way#{selector}(#{bbox});
-    );
-    out meta geom;
-    relation#{selector_relation}(#{bbox});
-    out meta geom(#{bbox});
+    overpass_query = <<~QUERY
+      [timeout:120][adiff:"#{date_start}","#{date_end}"];
+      (
+        node#{selector}(#{bbox});
+        way#{selector}(#{bbox});
+      );
+      out meta geom;
+      relation#{selector_relation}(#{bbox});
+      out meta geom(#{bbox});
     QUERY
     puts [overpass_url, overpass_query]
 
