@@ -42,8 +42,12 @@ class Overpass < OSMSource
     QUERY
     puts [overpass_url, overpass_query]
 
+    headers = {
+      'Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8',
+      'User-Agent' => 'openstreetmap_logical_history',
+    }
     uri = URI(overpass_url)
-    response = Net::HTTP.post_form(uri, 'data' => overpass_query)
+    response = Net::HTTP.post(uri, URI.encode_www_form(data: overpass_query), headers)
 
     raise response.body if !response.is_a?(Net::HTTPSuccess)
 
