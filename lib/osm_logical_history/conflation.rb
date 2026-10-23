@@ -273,9 +273,10 @@ module OSMLogicalHistory
         # TODO Handle case with reaming geom AND tags
       end
 
-      distance_matrix += conflate_matrix(new_befores, new_afters, demi_distance)
-      distance_matrix += conflate_matrix(new_befores, afters, demi_distance)
-      distance_matrix += conflate_matrix(befores, new_afters, demi_distance)
+      # Merge arrays: Set#merge's same-class path bypasses SortedSet#add on Ruby 4
+      distance_matrix.merge(conflate_matrix(new_befores, new_afters, demi_distance).to_a)
+      distance_matrix.merge(conflate_matrix(new_befores, afters, demi_distance).to_a)
+      distance_matrix.merge(conflate_matrix(befores, new_afters, demi_distance).to_a)
       befores = befores.merge(new_befores)
       afters = afters.merge(new_afters)
 

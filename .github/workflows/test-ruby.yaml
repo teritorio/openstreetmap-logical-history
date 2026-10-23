@@ -24,7 +24,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true
           cache-version: 2
 
@@ -42,7 +42,7 @@ jobs:
       #     bundle exec srb rbi suggest-typed
 
       - name: Build missing levenshtein
-        run: cd /home/runner/work/openstreetmap-logical-history/openstreetmap-logical-history/vendor/bundle/ruby/3.4.0/gems/levenshtein-ffi-1.1.0/ext/levenshtein && make
+        run: cd /home/runner/work/openstreetmap-logical-history/openstreetmap-logical-history/vendor/bundle/ruby/4.0.0/gems/levenshtein-ffi-1.1.0/ext/levenshtein && make
 
       - name: Run rubocop
         run: bundle exec rubocop --parallel -c .rubocop.yml
