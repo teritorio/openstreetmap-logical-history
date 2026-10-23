@@ -6,14 +6,7 @@ source 'https://rubygems.org'
 
 ruby '>= 3'
 
-gem 'activesupport'
-gem 'levenshtein-ffi'
-gem 'rgeo'
-gem 'rgeo-geojson'
-gem 'rgeo-proj4'
-gem 'rgl'
-gem 'sorbet-runtime'
-gem 'sorted_set', '~> 1.1'
+gemspec
 
 group :server, optional: true do
   gem 'async', '~> 2.33'

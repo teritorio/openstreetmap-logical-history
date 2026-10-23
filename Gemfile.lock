@@ -1,3 +1,16 @@
+PATH
+  remote: .
+  specs:
+    openstreetmap_logical_history (0.1.0)
+      activesupport (~> 8.1.0)
+      levenshtein-ffi (~> 1.1.0)
+      rgeo (~> 3.1.0)
+      rgeo-geojson (~> 2.2.0)
+      rgeo-proj4 (~> 5.0.0)
+      rgl (~> 0.6.6)
+      sorbet-runtime (~> 0.6.12586)
+      sorted_set (~> 1.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -33,6 +46,7 @@ GEM
     csv (3.3.6)
     drb (2.2.3)
     erubi (1.13.1)
+    ffi (1.17.4)
     ffi (1.17.4-x86_64-linux-gnu)
     ffi (1.17.4-x86_64-linux-musl)
     fiber-annotation (0.2.0)
@@ -192,27 +206,20 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  activesupport
   async (~> 2.33)
   hanami-api
   json
-  levenshtein-ffi
   moneta (~> 1.6)
+  openstreetmap_logical_history!
   puma (>= 8.0.0)
   rackup (~> 2.3)
   rake
   rexml
-  rgeo
-  rgeo-geojson
-  rgeo-proj4
-  rgl
   rubocop
   ruby-lsp
   sentry-ruby (~> 5.27)
   sorbet
   sorbet-rails
-  sorbet-runtime
-  sorted_set (~> 1.1)
   tapioca
   test-unit
 

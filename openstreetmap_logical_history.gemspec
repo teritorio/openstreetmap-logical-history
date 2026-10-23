@@ -31,11 +31,11 @@ Gem::Specification.new do |spec|
     gemspec,
   ]
 
-  spec.add_dependency 'activesupport', '~> 8.0.3'
+  spec.add_dependency 'activesupport', '~> 8.1.0'
   spec.add_dependency 'levenshtein-ffi', '~> 1.1.0'
   spec.add_dependency 'rgeo', '~> 3.1.0'
   spec.add_dependency 'rgeo-geojson', '~> 2.2.0'
-  spec.add_dependency 'rgeo-proj4', '~> 4.0.0'
+  spec.add_dependency 'rgeo-proj4', '~> 5.0.0'
   spec.add_dependency 'rgl', '~> 0.6.6'
   spec.add_dependency 'sorbet-runtime', '~> 0.6.12586'
   spec.add_dependency 'sorted_set', '~> 1.1'
