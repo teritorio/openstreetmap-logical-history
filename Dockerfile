@@ -1,4 +1,4 @@
-FROM ruby:3.4-alpine
+FROM ruby:4.0-alpine
 
 RUN apk add --no-cache --virtual \
         build-dependencies \
@@ -9,7 +9,8 @@ RUN apk add --no-cache --virtual \
 
 WORKDIR /srv/app
 
-ADD Gemfile Gemfile.lock ./
+ADD openstreetmap_logical_history.gemspec Gemfile Gemfile.lock ./
+ADD lib/osm_logical_history/version.rb ./lib/osm_logical_history/version.rb
 RUN bundle config --global silence_root_warning 1
 RUN bundle config set --local with server
 RUN bundle install
