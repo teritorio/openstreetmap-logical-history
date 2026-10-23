@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport', '~> 8.0.3'
   spec.add_dependency 'levenshtein-ffi', '~> 1.1.0'
-  spec.add_dependency 'rego', '~> 4.2.2'
+  spec.add_dependency 'rgeo', '~> 3.1.0'
   spec.add_dependency 'rgeo-geojson', '~> 2.2.0'
   spec.add_dependency 'rgeo-proj4', '~> 4.0.0'
   spec.add_dependency 'rgl', '~> 0.6.6'

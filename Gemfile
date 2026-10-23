@@ -8,7 +8,7 @@ ruby '>= 3'
 
 gem 'activesupport'
 gem 'levenshtein-ffi'
-gem 'rego'
+gem 'rgeo'
 gem 'rgeo-geojson'
 gem 'rgeo-proj4'
 gem 'rgl'
