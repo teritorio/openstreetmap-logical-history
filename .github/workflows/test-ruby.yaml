@@ -15,10 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: libgeos-dev libproj-dev
-          version: 2
+      # - uses: awalsh128/cache-apt-pkgs-action@latest
+      #   with:
+      #     packages: libgeos-dev libproj-dev
+      #     version: 2
+      # FIXME - cache should work, but it doesn't seem to be working with the current version.
+      # Install directly for now.
+      - name: Install GEOS and PROJ
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgeos-dev libproj-dev
 
       - uses: actions/checkout@v3
       - name: Set up Ruby
