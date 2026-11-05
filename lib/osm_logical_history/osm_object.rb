@@ -44,7 +44,7 @@ module OSMLogicalHistory
     sig { returns(String) }
     attr_reader :created
 
-    sig { returns(T::Hash[String, String]) }
+    sig { returns(T.nilable(T::Hash[String, String])) }
     attr_accessor :tags
 
     sig {
@@ -59,7 +59,7 @@ module OSMLogicalHistory
         uid: T.nilable(Integer),
         username: T.nilable(String),
         created: String,
-        tags: T::Hash[String, String]
+        tags: T.nilable(T::Hash[String, String])
       ).void
     }
     def initialize(objtype:, id:, geojson_geometry:, geos_factory:, deleted:, members:, version:, uid:, username:, created:, tags:)

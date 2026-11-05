@@ -62,8 +62,11 @@ module OSMLogicalHistory
 
       sig { returns(T::Hash[String, T::Array[[String, T.nilable(String), NilClass]]]) }
       def diff_tags
-        (before.tags.keys + after.tags.keys).uniq.select{ |key|
-          !before.tags.key?(key) || !after.tags.key?(key) || before.tags[key] != after.tags[key]
+        b_tags = before.tags || {}
+        a_tags = after.tags || {}
+
+        (b_tags.keys + a_tags.keys).uniq.select{ |key|
+          !b_tags.key?(key) || !a_tags.key?(key) || b_tags[key] != a_tags[key]
         }.to_h{ |key|
           [key, [['reject', nil, nil]]]
         }
@@ -116,11 +119,13 @@ module OSMLogicalHistory
 
     sig {
       params(
-        before_tags: T::Hash[String, String],
-        after_tags: T::Hash[String, String],
+        before_tags: T.nilable(T::Hash[String, String]),
+        after_tags: T.nilable(T::Hash[String, String]),
       ).returns(T::Boolean)
     }
     def same_refs?(before_tags, after_tags)
+      return false if before_tags.nil? || after_tags.nil?
+
       before_refs = OSMLogicalHistory::Refs.refs(before_tags).sort
       return false if before_refs.empty?
 
@@ -413,7 +418,7 @@ module OSMLogicalHistory
           # Merge remaining geom with already conflated main part
           p = block.call(paired)
           union = p.clone
-          union.tags = p.tags.merge(b.tags)
+          union.tags = (p.tags || {}).merge(b.tags || {})
           union.geos = T.must(p.geos).union(b.geos)
           paired.send("#{key}=", union)
           false

@@ -115,11 +115,13 @@ module OSMLogicalHistory
 
     sig {
       params(
-        tags_a: T::Hash[String, String],
-        tags_b: T::Hash[String, String],
+        tags_a: T.nilable(T::Hash[String, String]),
+        tags_b: T.nilable(T::Hash[String, String]),
       ).returns(T.nilable(DistanceMeusure))
     }
     def self.tags_distance(tags_a, tags_b)
+      return nil if tags_a.nil? || tags_b.nil?
+
       main_tags_a, other_tags_a = main_second_tags(tags_a)
       main_tags_b, other_tags_b = main_second_tags(tags_b)
 
